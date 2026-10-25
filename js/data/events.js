@@ -12,6 +12,8 @@
 //   options       choice 专用：[{ label, desc, effect(state), outcome }]
 //   effect        log 类事件的状态效果 { hp?, hap?, know?, rel?, money? }
 
+import { genFamilyName } from './names.js';
+
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
 const add = (e) => E.push(e);
@@ -345,7 +347,282 @@ add({
   effect: { hap: 3 },
 });
 
-// ── 家人死亡事件（父母）──
+// ══ 少年补充（12-17）══
+add({
+  id: 'peer-smoke', type: 'choice', minAge: 14, maxAge: 17,
+  cond: s => s.gender === 'male' && s.stats.rel > 45,
+  title: '巷子口的烟',
+  text: '要好的朋友递来一支烟：「就一口，试试而已。」周围的人都在看。',
+  source: '全球首次吸烟年龄集中在 13-15 岁（WHO 全球学生健康调查）',
+  options: [
+    { label: '接过来看看', outcome: '你咳得眼泪都出来了。但那一晚你觉得自己合群了。', effect: { hp: -3, rel: 4 } },
+    { label: '明确拒绝', outcome: '有人笑你胆小。但后来想抽烟时，第一个想到的是你的话。', effect: { hap: 1, rel: -2 } },
+    { label: '岔开话题去打球', outcome: '球赛比想象中尽兴。那支烟被忘在了原地。', effect: { hp: 3, rel: 2 } },
+  ],
+});
+add({
+  id: 'teen-competition', type: 'log', minAge: 12, maxAge: 17, weight: 8,
+  cond: s => s.interests.some(i => i.lv >= 3),
+  text: '你带着练了多年的{hobby}参加比赛，拿回一张奖状。母亲把它贴在了客厅最显眼的位置。',
+  effect: { hap: 8, know: 2 },
+  fill: s => ({ hobby: s.interests[0].name }),
+});
+add({
+  id: 'school-bully', type: 'log', minAge: 11, maxAge: 15, weight: 7,
+  text: '班里几个高个子总在放学路上堵你。你开始绕远路回家，谁也没告诉。',
+  source: '全球约 32% 的学生曾遭受校园欺凌（UNESCO）',
+  effect: { hap: -8, rel: -3 },
+});
+add({
+  id: 'teen-crush', type: 'log', minAge: 15, maxAge: 17, weight: 10,
+  text: '你开始在意一个人。上课传的小纸条被你夹在课本里，保留了很多年。',
+  effect: { hap: 6 },
+});
+add({
+  id: 'gaokao-stress', type: 'log', minAge: 17, maxAge: 17,
+  cond: s => s.inSchool && s.country === 'china',
+  text: '高考倒计时牌翻到了两位数。教室里的空气紧得像拉满的弓弦。',
+  source: '2024 年全国高考报名人数约 1342 万（教育部）',
+  effect: { hap: -4, know: 3 },
+});
+add({
+  id: 'rural-dropout-work', type: 'log', minAge: 15, maxAge: 17, weight: 6,
+  cond: s => s.country === 'india' && s.region === '乡村' && s.wealthIdx <= 1,
+  text: '家里的债压得紧。你收拾书包那年，同村的伙伴们大多已经在外省的工地上了。',
+  source: '印度约有 1,040 万名儿童青少年失学（UNESCO UIS）',
+  effect: { know: -6, hap: -4 }, action: s => { s.inSchool = false; },
+});
+add({
+  id: 'city-library', type: 'log', minAge: 12, maxAge: 17, weight: 7,
+  cond: s => s.region === '城市' && s.wealthIdx >= 2,
+  text: '你办了人生第一张图书馆借书证。整个暑假都泡在三楼靠窗的位子上。',
+  effect: { know: 5, hap: 2 },
+});
+
+// ══ 大学时代（19-22）══
+add({
+  id: 'uni-club', type: 'log', minAge: 19, maxAge: 21, weight: 10,
+  cond: s => s.inSchool && s.degree === '大学',
+  text: '你加入了社团，认识了一群熬夜聊天到天亮的人。多年后你们还在同一个群里。',
+  effect: { rel: 6, hap: 3 },
+});
+add({
+  id: 'uni-love', type: 'choice', minAge: 19, maxAge: 21,
+  cond: s => s.inSchool && s.degree === '大学' && !s.spouse,
+  title: '图书馆的同一张桌子',
+  text: '那个人总坐在你斜对面。今天，对面的位子空着，桌上留了一张字条。',
+  options: [
+    { label: '写下回应', outcome: '你们在一起了。那是一段很多年后想起来还会笑的日子。', effect: { hap: 10, rel: 6 } },
+    { label: '专注学业', outcome: '你把字条压回了书页里。期末成绩单很漂亮，深夜偶尔会想起那张桌子。', effect: { know: 6, hap: -2 } },
+  ],
+});
+add({
+  id: 'uni-fail', type: 'log', minAge: 19, maxAge: 22, weight: 8,
+  cond: s => s.inSchool && s.degree === '大学' && s.stats.know < 55,
+  text: '你挂了一门课。重修教室里，你第一次认真听完了一整个学期的课。',
+  effect: { know: 4, hap: -3 },
+});
+add({
+  id: 'uni-scholarship', type: 'log', minAge: 19, maxAge: 22, weight: 6,
+  cond: s => s.inSchool && s.degree === '大学' && s.stats.know > 70,
+  text: '你的名字出现在奖学金公示栏。这是你第一次靠自己的本事挣到钱。',
+  effect: { hap: 8, know: 2 }, action: s => { s.money += Math.round(s.gdpPpp * 0.15); },
+});
+
+// ══ 成年空窗（18-40）══
+add({
+  id: 'job-search-adult', type: 'log', minAge: 23, maxAge: 38, weight: 14,
+  cond: s => !s.job && !s.inSchool && s.degree !== '（辍学）',
+  text: '你投出几十份简历后，终于收到了录用通知。上班第一天，你把工牌擦了又擦。',
+  source: 'ILO：全球青年就业质量持续分化（2024）',
+  action: s => {
+    s.job = s.degree === '大学' ? '公司职员' : s.degree === '职业学校' ? '技术工人' : '商店店员';
+    s.income = Math.round(s.gdpPpp * (s.degree === '大学' ? 0.9 : 0.55));
+  },
+  effect: { hap: 5 },
+});
+add({
+  id: 'promotion', type: 'choice', minAge: 30, maxAge: 50, weight: 10,
+  cond: s => s.job && !s.retired,
+  title: '升职的代价',
+  text: '上司找你谈话：升职加薪三成，但接下来两年要常驻外地项目，家里的事就顾不上了。',
+  options: [
+    { label: '接下来', outcome: '两年里你换了三座城市，收入大涨，孩子的家长会你一次没去。', effect: { hap: -3 }, money: s => Math.round(s.gdpPpp * 0.6), action: s => { s.income = Math.round(s.income * 1.3); } },
+    { label: '婉拒', outcome: '你按时下班的那天，全家吃了顿很久没有过的团圆饭。', effect: { hap: 6, rel: 4 } },
+  ],
+});
+add({
+  id: 'buy-house', type: 'choice', minAge: 28, maxAge: 45,
+  cond: s => !s.house && s.money > s.gdpPpp * 1.5 && !s.retired,
+  title: '一套自己的房子',
+  text: `中介带你看了一天的房。首付要掏空大半积蓄，之后每个月都是固定的月供。买，还是继续租？`,
+  source: '全球主要经济体房价收入比持续走高（IMF 住房监测）',
+  options: [
+    { label: '咬牙买下', outcome: '拿到钥匙那天你在空荡荡的客厅坐了很久。这是你的了。', effect: { hap: 8, rel: 3 }, money: s => -Math.round(s.gdpPpp * 1.2), action: s => { s.house = true; } },
+    { label: '再等等', outcome: '后来房价涨了又跌。你始终没能下定决心。', effect: { hap: -1 } },
+  ],
+});
+add({
+  id: 'late-marriage', type: 'choice', minAge: 31, maxAge: 40,
+  cond: s => !s.spouse && !s.engaged,
+  title: '相亲桌上的第三个人',
+  text: '亲戚又安排了一场相亲。对方条件合适，性格也温和。但你总觉得少了点什么。',
+  source: '全球初婚年龄持续推迟（UN 世界婚姻数据 2022）',
+  options: [
+    { label: '认真处下去', outcome: '半年后你们领了证。日子不轰轰烈烈，但很踏实。', effect: { hap: 6, rel: 4 }, action: s => { s.spouse = genFamilyName(s.rng, s.country, s.gender === 'male' ? 'female' : 'male'); s.spouseAge = s.age + s.rng.int(-4, 3); } },
+    { label: '再等等对的人', outcome: '家人叹气。你搬去了离他们更远一点的地方，自己过日子。', effect: { rel: -4 } },
+  ],
+});
+add({
+  id: 'second-child', type: 'choice', minAge: 30, maxAge: 40,
+  cond: s => s.spouse && s.children.length === 1 && !s.childcareDone,
+  title: '要不要二胎',
+  text: '夜里孩子睡熟了，你们说起再要一个的事。一个孩子的孤单，还是一家人的辛苦？',
+  options: [
+    { label: '要', outcome: '一年后家里多了个小婴儿。老大学会了让着别人。', effect: { hap: 5 }, action: s => { const g = s.rng.chance(0.5) ? 'male' : 'female'; s.children.push({ name: genFamilyName(s.rng, s.country, g), gender: g, age: 0 }); } },
+    { label: '一个就够了', outcome: '你们把所有的资源与爱都给了这一个孩子。', effect: { rel: 3 } },
+  ],
+});
+add({
+  id: 'child-school-choice', type: 'choice', minAge: 30, maxAge: 42,
+  cond: s => s.children.length > 0 && s.children.some(c => c.age === 6),
+  title: '孩子的学校',
+  text: '孩子到了上学的年纪。片内学校免费但普通，好学校要交一笔不小的赞助费，还得托关系。',
+  source: '家庭的教育支出与入学机会高度相关（世界银行教育简报）',
+  options: [
+    { label: '花钱进好学校', outcome: '赞助费肉疼了一整年。孩子在新的班级里如鱼得水。', effect: { money: s => -Math.round(s.gdpPpp * 0.4), hap: 3 } },
+    { label: '就近入学', outcome: '孩子在家门口上学，每天放学你自己接。省下的钱存进了教育基金。', effect: { rel: 4 } },
+  ],
+});
+add({
+  id: 'invest-stock', type: 'choice', minAge: 30, maxAge: 55, weight: 8,
+  cond: s => s.money > s.gdpPpp * 0.5,
+  title: '同事的荐股',
+  text: '同事神神秘秘地说一只股票「稳赚」，他已经赚了一辆车的钱。你账户里躺着一笔闲钱。',
+  options: [
+    { label: '跟进一把', outcome: st => { const win = st.rng.chance(0.4); st.money += (win ? 1 : -1) * Math.round(st.money * 0.25); st.stats.hap = Math.max(0, st.stats.hap + (win ? 4 : -6)); return win ? '你赶上了尾巴，小赚一笔就跑了。之后这只股连续跌停半年。' : '三个月后腰斩。你删掉了那个软件，很久没有再打开。'; } },
+    { label: '不碰', outcome: '半年后那只股果然翻了倍。你平静地关掉了同事发来的走势图。', effect: { hap: 1 } },
+  ],
+});
+add({
+  id: 'parents-illness', type: 'choice', minAge: 40, maxAge: 60,
+  cond: s => s.father.alive || s.mother.alive,
+  title: '病房外的长夜',
+  text: '父亲住了院。医生把你拉到一边说需要长期照护。你是家里的独苗，工作请不了长假。',
+  source: '全球老龄化加速，长期照护缺口扩大（WHO 老年健康报告）',
+  options: [
+    { label: '辞职回家照顾', outcome: '你陪父亲走完了治疗期。再找工作时，简历上有了一段两年的空白。', effect: { rel: 6, hap: 2 }, action: s => { s.job = null; s.income = 0; s.father.alive = false; } },
+    { label: '请护工分担', outcome: '护工很尽责，你每周探望两次。父亲嘴上说不用总来，眼睛却一直追着你。', effect: { money: s => -Math.round(s.gdpPpp * 0.5), rel: 2 } },
+  ],
+});
+add({
+  id: 'health-check', type: 'log', minAge: 38, maxAge: 70, weight: 7,
+  text: '体检报告出来：血压偏高，其他尚可。医生叮嘱少油少盐，多走路。',
+  source: '全球约 13 亿人患高血压，知晓率不足半数（WHO 2023）',
+  effect: { hp: -2 }, action: s => { s.chronic = s.chronic || []; s.chronic.push('高血压'); },
+});
+add({
+  id: 'class-reunion', type: 'log', minAge: 32, maxAge: 55, weight: 8,
+  text: '同学聚会。有人发了财，有人离了婚，有人已经不在了。散场时你们在校门口合了最后一张影。',
+  effect: { hap: 3, rel: 5 },
+});
+add({
+  id: 'mid-life-crisis', type: 'log', minAge: 42, maxAge: 50, weight: 9,
+  text: '某个加班的深夜，你在写字楼卫生间镜子里看见一个眼角下垂的中年人，愣了很久没认出是自己。',
+  effect: { hap: -6 },
+});
+add({
+  id: 'mid-walk', type: 'log', minAge: 40, maxAge: 60, weight: 9,
+  text: '你开始每天晚饭后走路一小时。走到第三个月，体检单上的箭头少了两个。',
+  effect: { hp: 5, hap: 2 },
+});
+
+// ══ 中老年（55+）══
+add({
+  id: 'grandchild', type: 'log', minAge: 55, maxAge: 80, weight: 12,
+  cond: s => s.children.length > 0,
+  text: '孩子打来电话：你当爷爷奶奶了。你在电话这头应了好几声，手一直在抖。',
+  effect: { hap: 12, rel: 4 },
+});
+add({
+  id: 'spouse-death', type: 'log', minAge: 55, maxAge: 100, weight: 7,
+  cond: s => s.spouse,
+  text: '跟你吵了一辈子也暖了一辈子的那个人，先走了。屋里安静得可怕。',
+  effect: { hap: -18, rel: -4 }, action: s => { s.spouse = null; },
+});
+add({
+  id: 'elder-fall', type: 'log', minAge: 70, maxAge: 105, weight: 10,
+  cond: s => s.stats.hp < 60,
+  text: '浴室里滑了一跤，股骨骨折。躺在病床上你第一次承认：自己是老人了。',
+  source: '跌倒是全球 65 岁以上老人伤害死亡的首要原因（WHO）',
+  effect: { hp: -10, hap: -6 },
+});
+add({
+  id: 'elder-hospital-choice', type: 'choice', minAge: 75, maxAge: 105,
+  cond: s => s.stats.hp < 45,
+  title: '手术同意书',
+  text: '医生说手术还有机会，但以现在的身体，风险不小。孩子们围在病床边等你拿主意。',
+  options: [
+    { label: '做手术搏一把', outcome: st => { const ok = st.rng.chance(0.6); if (ok) st.stats.hp = Math.min(100, st.stats.hp + 25); else st.diedInChoice = true; return ok ? '手术很成功。出院那天你请全家吃了顿饭。' : '手术没能扛过去。你是听着孩子说话的声音离开的。'; } },
+    { label: '保守治疗', outcome: '你选了不折腾。剩下的日子，想吃什么吃什么，想去哪去哪。', effect: { hap: 8, hp: -3 } },
+  ],
+});
+add({
+  id: 'grandcare', type: 'log', minAge: 58, maxAge: 78, weight: 11,
+  cond: s => s.children.length > 0,
+  text: '你每天去接孙辈放学。小区里的老人都认得你，说你气色比十年前还好。',
+  effect: { hap: 6, rel: 3, hp: 2 },
+});
+add({
+  id: 'elder-garden', type: 'log', minAge: 60, maxAge: 90, weight: 10,
+  cond: s => s.region === '乡村' || s.house,
+  text: '你在院子里开了一小片菜地。番茄和辣椒长得好，邻居来讨了几次种。',
+  effect: { hap: 7, hp: 2 },
+});
+add({
+  id: 'elder-memoir', type: 'log', minAge: 70, maxAge: 100, weight: 8,
+  text: '你开始把这辈子的事讲给孙辈听。有些情节连你的孩子都是第一次听说。',
+  effect: { hap: 6, rel: 4 },
+});
+add({
+  id: 'retire-peace', type: 'log', minAge: 62, maxAge: 85, weight: 10,
+  cond: s => s.retired,
+  text: '清晨的公园里，你打完一套太极，坐在长椅上看鸽子。日子慢了下来，心也慢了下来。',
+  effect: { hap: 5, hp: 2 },
+});
+add({
+  id: 'diabetes', type: 'log', minAge: 50, maxAge: 85, weight: 6,
+  text: '查出糖尿病。从这天起，甜的东西都要忌口了。',
+  source: '全球约 8.3 亿人患糖尿病，过半未获治疗（Lancet 2024）',
+  effect: { hp: -4 }, action: s => { s.chronic = s.chronic || []; s.chronic.push('糖尿病'); },
+});
+add({
+  id: 'widen-world', type: 'log', minAge: 60, maxAge: 75, weight: 7,
+  cond: s => s.money > s.gdpPpp * 2 && s.stats.hap > 55,
+  text: '你带着老伴坐了一趟很远很远的火车，看了年轻时没看成的大海。',
+  effect: { hap: 9, rel: 3 },
+});
+
+// ══ 灾害与时代（全年龄，低频）══
+add({
+  id: 'disaster-flood', type: 'log', minAge: 1, maxAge: 100, weight: 4,
+  cond: s => s.region === '乡村',
+  text: '夏天暴雨连下了半个月，河水漫进了院子。全村人蹲在房顶上等救援。',
+  source: '仅 2023 年就有约 9300 万人受自然灾害影响（EM-DAT）',
+  effect: { hap: -7 }, action: s => { s.money = Math.max(0, s.money - Math.round(s.gdpPpp * 0.2)); },
+});
+add({
+  id: 'disaster-heat', type: 'log', minAge: 1, maxAge: 100, weight: 4,
+  text: '破纪录的热浪持续了四十天，有一阵子谁都没法出门。',
+  source: '2023 年为有记录以来最热一年（WMO）',
+  effect: { hap: -3, hp: -2 },
+});
+add({
+  id: 'era-phone', type: 'log', minAge: 8, maxAge: 60, weight: 5,
+  text: '你拥有了人生第一部手机。头几个晚上，你把它放在枕头旁边睡着了。',
+  effect: { hap: 5, know: 1 },
+});
+
 add({
   id: 'father-death', type: 'log', minAge: 30, maxAge: 75, weight: 6,
   cond: s => s.father.alive,

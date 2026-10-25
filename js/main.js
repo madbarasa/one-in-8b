@@ -69,6 +69,14 @@ function doYear() {
     showChoice(st, r.choice, (option) => {
       resolveChoice(st, r.choice, option);
       st.awaitChoice = false;
+      // 抉择内死亡（如手术失败）
+      if (st.diedInChoice) {
+        st.alive = false;
+        st.deathInfo = { age: st.age, year: st.birthYear + st.age, cause: '手术并发症' };
+        updateGame(st);
+        onDeath();
+        return;
+      }
       updateGame(st);
       if (!st.alive) { onDeath(); return; }
       startLoop();

@@ -125,11 +125,13 @@ export function resolveChoice(st, ev, option) {
   if (option.buyHouse) st.house = true;
   if (option.retire !== undefined) st.retired = option.retire;
   if (option.raiseIncome) st.income = Math.round(st.income * (1 + option.raiseIncome));
+  if (option.action) option.action(st);
 
-  // 记录时间线
+  // 记录时间线（outcome 支持动态函数：函数内可自行结算钱与状态）
+  const outcomeText = typeof option.outcome === 'function' ? option.outcome(st) : option.outcome;
   st.timeline.push({
     age: st.age, year: st.birthYear + st.age,
-    text: `${option.outcome}`, source: ev.source || null, negative: totalEffect(eff) < 0,
+    text: `${outcomeText}`, source: ev.source || null, negative: totalEffect(eff) < 0,
   });
 }
 
