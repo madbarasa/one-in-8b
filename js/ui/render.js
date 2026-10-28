@@ -1,6 +1,7 @@
 // UI 渲染层：所有 DOM 绘制
 import { COUNTRIES } from '../data/countries.js';
 import { summarize } from '../engine/life.js';
+import { avatarSVG, sceneSVG, crowdSVG, tombstoneSVG } from './pixel.js';
 
 const $app = () => document.getElementById('app');
 const $modal = () => document.getElementById('modal-root');
@@ -20,7 +21,8 @@ export function renderHome(onBirth) {
       <h1 class="hero-title">八十亿分之一</h1>
       <p class="hero-sub">就在此刻，每秒大约有四个婴儿诞生。你将成为其中一个，把仅此一次的人生走到最后。<br>在哪里出生、成为谁的孩子，都无法选择。就像你当初一样。</p>
       <button class="btn-birth" id="btn-birth">出　生</button>
-      <p class="home-note">复刻研究版 · 数据近似整理自 UN WPP 2024 / WHO / 世界银行 · 目前覆盖中国与印度</p>
+      <div class="hero-crowd" title="五国群像">${crowdSVG()}</div>
+      <p class="home-note">复刻研究版 · 数据近似整理自 UN WPP 2024 / WHO / 世界银行 · 已覆盖五国（全球新生儿约 35%）</p>
     </div>
     <div class="home-distro">
       <h2>如果你是此刻出生的婴儿</h2>
@@ -32,8 +34,8 @@ export function renderHome(onBirth) {
         </div>`).join('')}
       <div class="distro-row">
         <span class="d-name">其余国家与地区</span>
-        <div class="d-bar"><i style="width:${(100 - 24.3) * 0.95}%"></i></div>
-        <span class="d-pct">75.7%</span>
+        <div class="d-bar"><i style="width:${(100 - 35) * 0.95}%"></i></div>
+        <span class="d-pct">65%</span>
       </div>
       <p class="src">全球 2023 年出生约 1.32 亿人（UN《世界人口展望 2024》）</p>
     </div>
@@ -49,6 +51,7 @@ export function renderBirthCard(b, cardNo, onStart) {
     <div class="birth-card">
       <div class="bc-head"><span class="t">出生登记</span><span class="no">No. ${cardNo}</span></div>
       <div class="bc-name">${esc(b.name)}</div>
+      <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72)}</div>
       <p class="bc-desc">${b.birthYear} 年，${b.countryName}${b.region}，${esc(b.father.job)}与${esc(b.mother.job)}的家庭，是个${g}。</p>
       <div class="bc-grid">
         <div><i>性别</i><b>${g}</b></div>
@@ -87,6 +90,7 @@ export function renderGameShell(st, handlers) {
       <aside class="col-left">
         <div class="panel id-card">
           <div class="p-head"><span>身份纪录</span><b>${st.code} ${st.birthYear}</b></div>
+          <div class="id-avatar" id="id-avatar">${avatarSVG(st.country, st.gender, 'baby', 44)}</div>
           <div class="id-name">${esc(st.name)}</div>
           <div class="id-rows">
             <div><i>性别</i><b>${st.gender === 'male' ? '男' : '女'}</b></div>
@@ -156,6 +160,9 @@ export function updateGame(st) {
   document.getElementById('cost-num').textContent = fmtMoney(st.yearlyCost || 0);
   const deg = document.getElementById('id-degree'); if (deg) deg.textContent = st.degree;
   const job = document.getElementById('id-job'); if (job) job.textContent = st.job || '—';
+  // 头像随人生阶段更新
+  const av = document.getElementById('id-avatar');
+  if (av) av.innerHTML = avatarSVG(st.country, st.gender, stageOf(st.age), 44);
   renderTimeline(st);
   renderFamily(st);
   renderMap(st);
@@ -175,39 +182,16 @@ export function renderFocus(st) {
   });
 }
 
-// 程序化像素场景：随年龄段变化（零外部资源）
+// 程序化像素场景：国家×城乡×人生阶段（v0.4.0 国别像素皮肤）
 export function drawScene(st) {
   const el = document.getElementById('scene-art');
   if (!el) return;
-  const age = st.age;
-  const urban = st.region === '城市';
-  // 调色（城乡/昼夜简化）
-  const sky = urban ? '#cfd9e2' : '#dfe8d9';
-  const ground = urban ? '#9aa0a6' : '#8fae72';
-  const house = urban ? '#7a8494' : '#c4a06a';
-  const roof = urban ? '#4a525c' : '#8a4f3a';
-  // 人：0-2 襁褓 3-12 小人 13-59 成人 60+ 驼背
-  const p = (x, y, s) => {
-    const h = s === 'baby' ? 5 : s === 'kid' ? 9 : 13;
-    return `<rect x="${x}" y="${y - h}" width="5" height="${h}" fill="#3a3f45"/>
-      <rect x="${x + 1}" y="${y - h - 4}" width="4" height="4" fill="#e8c49a"/>`;
-  };
-  const isBaby = age < 3, isKid = age >= 3 && age < 13, isOld = age >= 60;
-  const svg = `<svg viewBox="0 0 320 210" shape-rendering="crispEdges">
-    <rect x="0" y="0" width="320" height="140" fill="${sky}"/>
-    <rect x="0" y="140" width="320" height="70" fill="${ground}"/>
-    <rect x="248" y="96" width="54" height="44" fill="${house}"/>
-    <rect x="244" y="88" width="62" height="10" fill="${roof}"/>
-    <rect x="266" y="116" width="12" height="24" fill="#5a4632"/>
-    ${urban ? `<rect x="30" y="70" width="26" height="70" fill="#8a929c"/><rect x="64" y="90" width="20" height="50" fill="#7a8494"/><rect x="36" y="78" width="5" height="6" fill="#e8d9a0"/><rect x="44" y="78" width="5" height="6" fill="#e8d9a0"/>` : `<rect x="34" y="104" width="6" height="36" fill="#6a5236"/><circle cx="37" cy="98" r="12" fill="#6f9a54"/>`}
-    ${isBaby ? `<rect x="150" y="132" width="12" height="9" fill="#d8d2c6"/><rect x="153" y="128" width="5" height="4" fill="#e8c49a"/>`
-      : isKid ? p(152, 140, 'kid') : p(150, 140, 'adult')}
-    ${!isBaby && st.spouse ? p(162, 140, 'adult') : ''}
-    ${st.children.length && age > 30 ? p(176, 140, 'kid') : ''}
-  </svg>`;
-  el.innerHTML = svg;
+  el.innerHTML = sceneSVG(st);
   const cap = document.getElementById('scene-cap');
-  if (cap) cap.textContent = `${st.countryName}·${st.region}${isBaby ? ' · 襁褓之中' : isOld ? ' · 晚年' : ''} · ${st.inSchool ? '在学' : st.job ? st.job : '与家人同住'}`;
+  if (cap) {
+    const isBaby = st.age < 3, isOld = st.age >= 60;
+    cap.textContent = `${st.countryName}·${st.region}${isBaby ? ' · 襁褓之中' : isOld ? ' · 晚年' : ''} · ${st.inSchool ? '在学' : st.job ? st.job : '与家人同住'}`;
+  }
 }
 
 function renderTimeline(st) {
@@ -268,7 +252,15 @@ export function showChoice(st, ev, onPick) {
   });
 }
 
-// 死亡纪录
+// 年龄 → 人生阶段
+function stageOf(age) {
+  if (age < 3) return 'baby';
+  if (age < 13) return 'kid';
+  if (age < 18) return 'teen';
+  if (age < 60) return 'adult';
+  return 'old';
+}
+
 export function renderEnd(st, onRestart) {
   const d = st.deathInfo;
   $app().innerHTML = `
@@ -276,6 +268,7 @@ export function renderEnd(st, onRestart) {
     <div class="end-card">
       <div class="end-head"><span class="t">死亡纪录 · RECORD OF DEATH</span><span>No. ${st.cardNo || st.code + '-' + d.year}</span></div>
       <div class="end-life">
+        <div class="end-tomb">${tombstoneSVG(st)}</div>
         <div class="name">${esc(st.name)}</div>
         <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${st.countryName}${st.region}</div>
         <p class="story">${esc(summarize(st))}</p>
