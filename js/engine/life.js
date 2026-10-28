@@ -192,7 +192,7 @@ function die(st) {
   let cause = causes[idx][0];
   // 婴幼儿期死因替换（真实统计：新生儿与感染性疾病为主）
   if (st.age <= 4) {
-    cause = st.rng.chance(0.6) ? '新生儿疾病' : (st.country === 'india' ? '腹泻性疾病' : '意外窒息');
+    cause = st.rng.chance(0.6) ? '新生儿疾病' : (COUNTRIES[st.country].infantCause || '意外窒息');
   }
   st.deathInfo = { age: st.age, year: st.birthYear + st.age, cause };
 }

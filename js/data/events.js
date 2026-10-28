@@ -13,6 +13,7 @@
 //   effect        log 类事件的状态效果 { hp?, hap?, know?, rel?, money? }
 
 import { genFamilyName } from './names.js';
+import { WORLD_EVENTS } from './events_world.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -612,7 +613,7 @@ add({
   effect: { hap: -7 }, action: s => { s.money = Math.max(0, s.money - Math.round(s.gdpPpp * 0.2)); },
 });
 add({
-  id: 'disaster-heat', type: 'log', minAge: 1, maxAge: 100, weight: 4,
+  id: 'disaster-heatwave', type: 'log', minAge: 1, maxAge: 100, weight: 4,
   text: '破纪录的热浪持续了四十天，有一阵子谁都没法出门。',
   source: '2023 年为有记录以来最热一年（WMO）',
   effect: { hap: -3, hp: -2 },
@@ -637,6 +638,9 @@ add({
   effect: { hap: -10, rel: -3 },
   action: s => { s.mother.alive = false; },
 });
+
+// 国别特色事件并入主池
+E.push(...WORLD_EVENTS);
 
 export const EVENTS = E;
 
