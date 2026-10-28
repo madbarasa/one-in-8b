@@ -1,5 +1,7 @@
-// 生命表：逐年死亡概率 qx（近似整理自 UN WPP 2024 中国/印度生命表形态，MVP 用）
-// 结构：{ age: qx }，未标注的年龄取相邻段插值；qx 为单年死亡概率
+// 生命表：逐年死亡概率 qx（近似整理自 UN WPP 2024 各国生命表形态）
+// 结构：{ age: qx }，qx 为单年死亡概率
+// 中/印为手工整理表；美/印尼/巴以印度形态为基准做参数化变体（婴儿/童年/成年/老年段差异化缩放），
+// 并经 scripts/calibrate_lifetables.mjs 校准，使出生期望寿命对齐 WHO/世行口径
 
 const CN_MALE = {
   0: 0.0045, 1: 0.0007, 2: 0.0005, 3: 0.0004, 4: 0.0004,
@@ -109,9 +111,44 @@ const IN_FEMALE = {
   115: 0.6514
 };
 
+// 参数化变体：以基准表形态按年龄段缩放
+// 婴儿(0) / 童年(1-4) / 成年(5-49) / 老年(50+) 各段独立倍率
+function variant(base, { infant = 1, child = 1, adult = 1, old = 1 }) {
+  const t = {};
+  for (const [age, q] of Object.entries(base)) {
+    const a = +age;
+    const f = a === 0 ? infant : a <= 4 ? child : a <= 49 ? adult : old;
+    t[age] = Math.min(0.99, Math.max(1e-6, q * f));
+  }
+  return t;
+}
+
+// 中国手工表整体老年段偏保守（e0 偏短），全局校正后使用
+const CN_MALE_FIX = variant(CN_MALE, { old: 0.86 });
+const CN_FEMALE_FIX = variant(CN_FEMALE, { old: 0.66 });
+
+// 美国：发达国家形态（婴儿死亡率 5.4‰ 介于中印之间；成年段车祸/药物过量风险高；老年段最优医疗）
+const US_MALE = variant(CN_MALE_FIX, { infant: 1.2, child: 1.1, adult: 1.25, old: 0.88 });
+const US_FEMALE = variant(CN_FEMALE_FIX, { infant: 1.15, child: 1.1, adult: 1.2, old: 0.85 });
+
+// 印度表老年段微调校正
+const IN_MALE_FIX = variant(IN_MALE, { old: 0.94 });
+const IN_FEMALE_FIX = variant(IN_FEMALE, { old: 0.9 });
+
+// 印尼：印度形态弱化版（婴儿死亡率 14‰ 约为印度一半；结核等传染病死亡略低；老年段接近印度）
+const ID_MALE = variant(IN_MALE_FIX, { infant: 0.55, child: 0.65, adult: 0.95, old: 0.93 });
+const ID_FEMALE = variant(IN_FEMALE_FIX, { infant: 0.5, child: 0.6, adult: 0.92, old: 0.9 });
+
+// 巴基斯坦：印度形态加强版（婴儿死亡率约 50‰；传染病负担更重；预期寿命 68.2）
+const PK_MALE = variant(IN_MALE_FIX, { infant: 1.9, child: 1.7, adult: 1.1, old: 1.05 });
+const PK_FEMALE = variant(IN_FEMALE_FIX, { infant: 1.75, child: 1.6, adult: 1.08, old: 1.03 });
+
 export const LIFETABLES = {
-  china:   { male: CN_MALE, female: CN_FEMALE },
-  india:   { male: IN_MALE, female: IN_FEMALE },
+  china:    { male: CN_MALE_FIX, female: CN_FEMALE_FIX },
+  india:    { male: IN_MALE_FIX, female: IN_FEMALE_FIX },
+  usa:      { male: US_MALE, female: US_FEMALE },
+  indonesia:{ male: ID_MALE, female: ID_FEMALE },
+  pakistan: { male: PK_MALE, female: PK_FEMALE },
 };
 
 // 查询某年龄的单年死亡概率；超过 115 岁必死

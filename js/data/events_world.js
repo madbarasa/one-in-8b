@@ -1,0 +1,553 @@
+// 国别特色事件库 v0.3.0：美国 18 / 印尼 15 / 巴基斯坦 12 / 中印补位与通用 25
+// 数据出处：CDC / NCHS / UN WPP / WHO GHE / 世界银行 / Pew / EM-DAT / 各国官方统计
+
+// 美国特色
+const US = [
+  {
+    id: 'us-thanksgiving', type: 'log', minAge: 5, maxAge: 85, weight: 10,
+    cond: s => s.country === 'usa',
+    text: '感恩节，一大家子围着火鸡和土豆泥坐下，桌上全是热闹的争论和笑声。',
+    source: '感恩节是美国出行量最大的节日，约 5000 万人返乡（AAA）',
+    effect: { rel: 3, hap: 2 },
+  },
+  {
+    id: 'us-shooter-drill', type: 'log', minAge: 6, maxAge: 17, weight: 14,
+    cond: s => s.country === 'usa',
+    text: '学校又组织了「封锁演习」：锁门、关灯、躲进墙角，保持安静。这已经是这学期的第二次。',
+    source: '2024 年美国发生 330 余起校园枪击事件（K-12 枪击数据库）',
+    effect: { hap: -3, know: 1 },
+  },
+  {
+    id: 'us-drivers-ed', type: 'choice', minAge: 16, maxAge: 16,
+    cond: s => s.country === 'usa',
+    title: '十六岁，方向盘',
+    text: '同学们都在考驾照了。在这个没有车几乎哪儿也去不了的国家，方向盘意味着自由。',
+    source: '美国约 86% 的成年人持有驾照（FHWA）',
+    options: [
+      { label: '考驾照，家里出钱买辆二手车', outcome: '你开着一辆掉漆的老车上学，后备箱塞满体育器材。', effect: { hap: 4, rel: 2, money: -1500 } },
+      { label: '先不考，坐校车和朋友的顺风车', outcome: '你成了拼车常客，跟谁都能聊起来。', effect: { rel: 4 } },
+    ],
+  },
+  {
+    id: 'us-prom', type: 'log', minAge: 16, maxAge: 18, weight: 12,
+    cond: s => s.country === 'usa',
+    text: '毕业舞会那晚，体育馆的彩灯、借来的西装或长裙、笨拙的舞步，成了青春的纪念照。',
+    effect: { hap: 3, rel: 2, money: -200 },
+  },
+  {
+    id: 'us-tip-job', type: 'log', minAge: 16, maxAge: 22, weight: 14,
+    cond: s => s.country === 'usa' && !s.firedEvents.has('us-tip-job'),
+    text: '你在餐厅端盘子赚小费，周末忙到脚不沾地，小票夹越来越鼓。',
+    source: '美国约 400 万人在全职从事小费岗位（BLS）',
+    effect: { money: 900, rel: 2, hp: -1 },
+  },
+  {
+    id: 'us-student-loan', type: 'choice', minAge: 18, maxAge: 18,
+    cond: s => s.country === 'usa' && s.wealthIdx <= 3,
+    title: '十八岁，大学的账单',
+    text: '录取通知来了，但学费单也来了：一年几万美元。这个国家的大学把学费标价给了所有人。',
+    source: '美国学生贷款总额 1.7 万亿美元，借款人超过 4300 万（纽约联储）',
+    options: [
+      { label: '签下学贷，读四年大学', outcome: '你在学费单上签了字，从此毕业后的第一份工资已经名花有主。', effect: { know: 8, money: -6000, hap: 2 } },
+      { label: '上社区学院，两年转学', outcome: '你先在便宜的社区学院修学分，再转入州立大学，账单轻了一半。', effect: { know: 6, money: -2500 } },
+      { label: '不上大学了，直接工作', outcome: '你从零售店店员做起，比同龄人早四年拿工资。', effect: { money: 1200, know: -2 } },
+    ],
+  },
+  {
+    id: 'us-debt-pay', type: 'log', minAge: 23, maxAge: 42, weight: 10, once: false,
+    cond: s => s.country === 'usa' && s.money < 30000,
+    text: '这个月工资单的固定一行又划走了：学贷还款。',
+    source: '美国学贷借款人平均负债约 3.8 万美元（Education Data Initiative）',
+    effect: { money: -900, hap: -1 },
+  },
+  {
+    id: 'us-medical-bill', type: 'log', minAge: 20, maxAge: 65, weight: 7,
+    cond: s => s.country === 'usa',
+    text: '一次急诊之后，账单像雪片一样寄到家里：救护车、医生、放射科，每一项都是单独收费。',
+    source: '约三分之二的美国个人破产与医疗支出相关（美国公共卫生杂志）',
+    effect: { money: -3500, hap: -4 },
+  },
+  {
+    id: 'us-car-accident', type: 'log', minAge: 16, maxAge: 30, weight: 6,
+    cond: s => s.country === 'usa',
+    text: '路口的一次让让抢抢，你出了人生第一场车祸，人没事，保险费涨了。',
+    source: '美国交通年死亡约 4 万人，为发达国家最高（NHTSA）',
+    effect: { hp: -3, money: -800 },
+  },
+  {
+    id: 'us-opioid', type: 'log', minAge: 20, maxAge: 48, weight: 3,
+    cond: s => s.country === 'usa',
+    text: '腰伤之后医生开的止痛药，不知不觉越吃越多。戒掉它们花了你一年。',
+    source: '阿片类药物过量每年夺走约 8 万美国人生命（CDC）',
+    effect: { hp: -7, hap: -5 },
+  },
+  {
+    id: 'us-hurricane', type: 'log', minAge: 0, maxAge: 85, weight: 7,
+    cond: s => s.country === 'usa',
+    text: '飓风来的那几天，全家用胶带封好窗户，然后沿着疏散路线堵在了高速公路上。',
+    source: '大西洋飓风季年均产生约 14 个命名风暴（NOAA）',
+    effect: { hap: -3, money: -700 },
+  },
+  {
+    id: 'us-wildfire', type: 'log', minAge: 0, maxAge: 85, weight: 6,
+    cond: s => s.country === 'usa',
+    text: '山火烧到了邻县，天空连着一周都是橙灰色的，出门要戴 N95。',
+    source: '美国 2024 年山火烧毁面积超过 400 万英亩（NIFC）',
+    effect: { hp: -3, hap: -2 },
+  },
+  {
+    id: 'us-black-friday', type: 'log', minAge: 12, maxAge: 65, weight: 9,
+    cond: s => s.country === 'usa',
+    text: '黑色星期五，你凌晨排队抢到了打折的大电视，觉得自己赚了。',
+    effect: { hap: 2, money: -300 },
+  },
+  {
+    id: 'us-college-game', type: 'log', minAge: 18, maxAge: 25, weight: 10,
+    cond: s => s.country === 'usa' && s.inSchool,
+    text: '周六的橄榄球主场，十万人一起喊校名，你跟着陌生人的肩膀一起晃。',
+    effect: { hap: 3, rel: 3 },
+  },
+  {
+    id: 'us-therapy', type: 'log', minAge: 25, maxAge: 60, weight: 8,
+    cond: s => s.country === 'usa' && s.money > 2000,
+    text: '你开始定期见心理咨询师，聊那些从没跟人说过的事。',
+    source: '美国约四分之一的成年人在过去一年接受过心理健康服务（CDC）',
+    effect: { hap: 4, money: -900 },
+  },
+  {
+    id: 'us-401k', type: 'log', minAge: 28, maxAge: 62, weight: 8, once: false,
+    cond: s => s.country === 'usa' && s.job,
+    text: '你往 401(k) 退休账户里又存了一年钱，公司按比例配了一部分。',
+    source: '约 6800 万美国人持有 401(k) 账户（ICI）',
+    effect: { money: 2500 },
+  },
+  {
+    id: 'us-election', type: 'log', minAge: 19, maxAge: 90, weight: 10, once: false,
+    cond: s => s.country === 'usa',
+    text: '大选日，你排了半小时队投下自己的一票，领到了「I VOTED」贴纸。',
+    source: '2024 年美国总统选举投票率 63.9%，为近一个世纪最高（AP）',
+    effect: { know: 2, hap: 1 },
+  },
+  {
+    id: 'us-student-culture', type: 'log', minAge: 8, maxAge: 14, weight: 8,
+    cond: s => s.country === 'usa',
+    text: '科学课上你做的火山模型喷了一桌子小苏打，被老师点名表扬。',
+    effect: { know: 3, hap: 2 },
+  },
+];
+
+// 印尼特色
+const IDN = [
+  {
+    id: 'id-volcano', type: 'log', minAge: 0, maxAge: 85, weight: 9,
+    cond: s => s.country === 'indonesia',
+    text: '附近的山又「醒了」：火山灰落满院子，你们收拾细软坐上了政府安排的卡车。',
+    source: '印尼拥有 127 座活火山，数量全球第一（PVMBG）',
+    effect: { hp: -2, hap: -3, money: -400 },
+  },
+  {
+    id: 'id-quake', type: 'log', minAge: 0, maxAge: 85, weight: 10,
+    cond: s => s.country === 'indonesia',
+    text: '深夜的强震把碗柜摇得哐哐响，全家跑到屋外空地上等着，直到震感过去。',
+    source: '印尼位于环太平洋地震带，年均发生数千次有感地震（BMKG）',
+    effect: { hp: -1, hap: -3 },
+  },
+  {
+    id: 'id-tsunami-drill', type: 'log', minAge: 6, maxAge: 16, weight: 10,
+    cond: s => s.country === 'indonesia' && s.inSchool,
+    text: '学校组织了海啸疏散演习：警报响起，全班按路线跑到高地集合点。',
+    source: '2004 年印度洋海啸在印尼亚齐造成约 17 万人遇难',
+    effect: { know: 3, hp: 1 },
+  },
+  {
+    id: 'id-ramadan', type: 'log', minAge: 8, maxAge: 70, weight: 12,
+    cond: s => s.country === 'indonesia' && s.religion === '伊斯兰教',
+    text: '斋月里你跟着长辈从日出守到日落，开斋饭桌前的一口水比什么都甜。',
+    source: '印尼约 87% 人口信仰伊斯兰教，为全球穆斯林人口最多的国家（Pew）',
+    effect: { hap: 2, rel: 3, hp: -1 },
+  },
+  {
+    id: 'id-mudik', type: 'log', minAge: 20, maxAge: 70, weight: 10,
+    cond: s => s.country === 'indonesia' && s.region === '城市',
+    text: '开斋节前，你挤上了返乡的大巴，堵在路上的时间比睡觉的时间还长，但值得。',
+    source: '印尼年度返乡潮 Mudik 覆盖数千万人次出行',
+    effect: { rel: 4, hap: 3, money: -150 },
+  },
+  {
+    id: 'id-motorbike', type: 'log', minAge: 15, maxAge: 25, weight: 12,
+    cond: s => s.country === 'indonesia',
+    text: '你学会了骑摩托，从此在车流的缝隙里穿梭自如，全家买菜也靠它。',
+    source: '印尼摩托车保有量超过 1.2 亿辆（印尼摩托车工业协会）',
+    effect: { hp: -2, hap: 2, rel: 1 },
+  },
+  {
+    id: 'id-flood', type: 'log', minAge: 0, maxAge: 70, weight: 9,
+    cond: s => s.country === 'indonesia' && s.region === '城市',
+    text: '雨季的暴雨让街区积水过膝，你卷起裤腿蹚水回家，拖鞋漂走了一只。',
+    source: '雅加达部分区域年均内涝数十次，城市正以每年约 25 厘米速度下沉',
+    effect: { hap: -2, money: -80 },
+  },
+  {
+    id: 'id-migrant-worker', type: 'choice', minAge: 16, maxAge: 40, weight: 15,
+    cond: s => s.country === 'indonesia' && s.wealthIdx <= 2 && !s.firedEvents.has('id-migrant-worker'),
+    title: '去海外做工的家人',
+    text: '家里的日子紧得喘不过气。中介说，去马来西亚或香港做工，一个月能挣在家半年的钱。',
+    source: '印尼海外劳工年汇款超过 130 亿美元（印尼央行）',
+    options: [
+      { label: '家人出发，家里每月多了汇款', outcome: '家里装上了新电视，但饭桌上从此空着一个位置。', effect: { money: 2200, rel: -3, hap: -1 } },
+      { label: '全家守在一起，再想想别的办法', outcome: '日子照旧紧巴，但一家人整整齐齐。', effect: { rel: 2, hap: 1 } },
+    ],
+  },
+  {
+    id: 'id-sewing', type: 'log', minAge: 8, maxAge: 14, weight: 10,
+    cond: s => s.country === 'indonesia' && s.gender === 'female' && s.wealthIdx <= 2,
+    text: '你跟着母亲学会了踩缝纫机，接一些缝补的活，攒下了自己的小金库。',
+    effect: { know: 2, money: 120 },
+  },
+  {
+    id: 'id-wayang', type: 'log', minAge: 5, maxAge: 15, weight: 8,
+    cond: s => s.country === 'indonesia',
+    text: '村里搭起白幕演皮影戏，你蹲在幕布后面看了一整晚，光影里全是英雄和神明。',
+    source: '哇扬皮影戏 2003 年入选联合国教科文组织人类非物质文化遗产',
+    effect: { know: 2, hap: 3 },
+  },
+  {
+    id: 'id-badminton', type: 'log', minAge: 8, maxAge: 20, weight: 10,
+    cond: s => s.country === 'indonesia',
+    text: '巷子里拉起一张网，塑料羽毛球打得噼啪响，你们模仿着汤姆斯杯冠军的杀球。',
+    effect: { hp: 3, hap: 2, rel: 2 },
+  },
+  {
+    id: 'id-street-food', type: 'log', minAge: 5, maxAge: 80, weight: 11,
+    cond: s => s.country === 'indonesia',
+    text: '街边摊的一碗肉汤饭配炸物，浇上辣酱，几块钱换来一整天的好心情。',
+    effect: { hap: 3, money: -20 },
+  },
+  {
+    id: 'id-languages', type: 'log', minAge: 6, maxAge: 18, weight: 9,
+    cond: s => s.country === 'indonesia' && s.inSchool,
+    text: '你在家说方言，在学校说印尼语，补习班还要学英语，脑子里住着三种话。',
+    source: '印尼活跃语言超过 700 种，数量居全球第二（Ethnologue）',
+    effect: { know: 3 },
+  },
+  {
+    id: 'id-kos', type: 'log', minAge: 18, maxAge: 26, weight: 9,
+    cond: s => s.country === 'indonesia' && s.region === '城市' && !s.house,
+    text: '你搬进了城里的出租屋（Kos）：一张床、一台风扇、共用的水龙头，房东阿姨管得很严。',
+    effect: { money: -500, rel: 1, know: 1 },
+  },
+  {
+    id: 'id-jam', type: 'log', minAge: 18, maxAge: 60, weight: 10,
+    cond: s => s.country === 'indonesia' && s.region === '城市' && s.job,
+    text: '又一次堵在路上，摩托车的河一眼望不到头，你在尾气里听完了整张专辑。',
+    source: '雅加达多年位居全球堵城前列，年均拥堵损失超 50 亿美元',
+    effect: { hap: -3, hp: -1 },
+  },
+];
+
+// 巴基斯坦特色
+const PK = [
+  {
+    id: 'pk-flood2022', type: 'log', minAge: 0, maxAge: 85, weight: 10,
+    cond: s => s.country === 'pakistan' && s.region === '乡村',
+    text: '洪水漫过了田埂和院墙，庄稼泡在水里，全家搬到路边的堤坝上搭帐篷。',
+    source: '2022 年巴基斯坦洪灾影响 3300 万人，约三分之一国土一度被淹（联合国）',
+    effect: { hp: -3, hap: -5, money: -900 },
+  },
+  {
+    id: 'pk-blackout', type: 'log', minAge: 8, maxAge: 70, weight: 12,
+    cond: s => s.country === 'pakistan',
+    text: '又停电了。你在蜡烛和手电的光里写完作业，全家把竹床搬到了屋顶上睡。',
+    source: '巴基斯坦夏季电力短缺，部分城市日均停电可达数小时',
+    effect: { hap: -2, know: 1 },
+  },
+  {
+    id: 'pk-cricket', type: 'log', minAge: 6, maxAge: 30, weight: 12,
+    cond: s => s.country === 'pakistan',
+    text: '巷子里的板球赛打到了「最后一球定胜负」，木棍削的球拍抡出了人生弧线。',
+    source: '板球为巴基斯坦第一运动，1992 年世界杯夺冠',
+    effect: { hp: 2, hap: 3, rel: 2 },
+  },
+  {
+    id: 'pk-girl-school', type: 'choice', minAge: 6, maxAge: 6,
+    cond: s => s.country === 'pakistan' && s.gender === 'female' && s.wealthIdx <= 2,
+    title: '六岁，该上学的妹妹',
+    text: '到了上学的年纪。村里人对女孩读书的看法不一，家里的账也不宽裕。',
+    source: '巴基斯坦失学儿童约 2600 万，其中女孩占多数（联合国儿童基金会）',
+    options: [
+      { label: '坚持送去学校', outcome: '你成了家里第一个识字的女人，课本被你翻到卷边。', effect: { know: 6, hap: 2, money: -200 } },
+      { label: '留在家里帮忙', outcome: '你学会了做饭、挑水、照顾弟妹，只是偶尔路过学校会多看一眼。', effect: { know: -3, rel: 3 } },
+    ],
+  },
+  {
+    id: 'pk-child-labor', type: 'log', minAge: 10, maxAge: 15, weight: 11,
+    cond: s => s.country === 'pakistan' && s.wealthIdx <= 1,
+    text: '放学后你去地毯作坊打零工，手指被线勒出一道道印子，换回几张纸币。',
+    source: '巴基斯坦童工约 330 万人，多数从事农业与手工业（ILO）',
+    effect: { know: -2, money: 180, hp: -2 },
+  },
+  {
+    id: 'pk-gulf-remittance', type: 'log', minAge: 10, maxAge: 60, weight: 9,
+    cond: s => s.country === 'pakistan' && s.wealthIdx <= 3,
+    text: '在迪拜做工的叔叔寄回了这个月的汇款，家里的债松了一口气。',
+    source: '巴基斯坦年海外汇款约 300 亿美元，约占 GDP 的 8%（巴基斯坦央行）',
+    effect: { money: 1400, rel: 1 },
+  },
+  {
+    id: 'pk-rally', type: 'log', minAge: 18, maxAge: 70, weight: 8,
+    cond: s => s.country === 'pakistan',
+    text: '大选临近，城里拉响了集会的喇叭，有些街区夜里提前宵禁。',
+    source: '巴基斯坦自 1947 年独立以来未完成过一次政府间的政权完整交接（直至 2013 年）',
+    effect: { hap: -2, know: 2 },
+  },
+  {
+    id: 'pk-flour', type: 'log', minAge: 10, maxAge: 70, weight: 10,
+    cond: s => s.country === 'pakistan' && s.wealthIdx <= 1,
+    text: '面粉又涨价了，母亲把面和得更稀，饼烙得更薄。',
+    source: '2023 年巴基斯坦通胀一度突破 30%，食品价格涨幅居前（巴基斯坦统计局）',
+    effect: { money: -200, hap: -3, hp: -1 },
+  },
+  {
+    id: 'pk-joint-family', type: 'log', minAge: 0, maxAge: 15, weight: 10,
+    cond: s => s.country === 'pakistan',
+    text: '一大家人住在一个院子里：叔叔婶婶、堂兄弟堂姐妹，饭永远是大锅饭。',
+    source: '巴基斯坦约六成家庭为扩展家庭共同居住（巴基斯坦人口普查）',
+    effect: { rel: 4, hap: 2 },
+  },
+  {
+    id: 'pk-sewing-machine', type: 'choice', minAge: 20, maxAge: 40, weight: 14,
+    cond: s => s.country === 'pakistan' && s.gender === 'female' && !s.job,
+    title: '一台缝纫机',
+    text: '邻居家的女人靠一台缝纫机在家接活，养活了自己的女儿。你也想去学。',
+    source: '巴基斯坦女性劳动参与率约 21%，为南亚最低之一（世界银行）',
+    options: [
+      { label: '攒钱买缝纫机，在家接活', outcome: '你从街坊的裤脚接起，三年后成了巷子里公认的裁缝。', effect: { money: 1500, know: 3, hap: 3, rel: 2 } },
+      { label: '守着家务，不折腾了', outcome: '日子照旧，你把希望放到了孩子身上。', effect: { rel: 2 } },
+    ],
+  },
+  {
+    id: 'pk-blast', type: 'log', minAge: 15, maxAge: 70, weight: 3,
+    cond: s => s.country === 'pakistan',
+    text: '集市的远处传来闷响，人群尖叫着涌过来，那天的摊位再没开张。',
+    source: '2009-2014 年间巴基斯坦恐袭高发，年均数百起（SATP）',
+    effect: { hap: -6, hp: -1 },
+  },
+  {
+    id: 'pk-bike-taxi', type: 'log', minAge: 18, maxAge: 45, weight: 9,
+    cond: s => s.country === 'pakistan' && s.gender === 'male' && s.wealthIdx <= 2,
+    text: '你注册了网约摩托车平台，手机往车把一夹，风里雨里都接单。',
+    source: '巴基斯坦网约出行注册司机数以百万计',
+    effect: { money: 1100, hp: -2 },
+  },
+];
+
+// 中国补位
+const CN = [
+  {
+    id: 'cn-zhongkao', type: 'choice', minAge: 15, maxAge: 15,
+    cond: s => s.country === 'china' && s.inSchool,
+    title: '十五岁，中考出分夜',
+    text: '分数出来了。全家围在电话前听分数：过普高线，还是去职校，这个夏天就要定。',
+    source: '中国约半数初中毕业生进入中等职业教育（教育部）',
+    options: [
+      { label: '压线进了普通高中', outcome: '你在班里的排名不好看，但好歹摸到了大学的门。', effect: { know: 5, hap: -1 } },
+      { label: '去职业学校学一门手艺', outcome: '你选了数控专业，实训车间的铁屑味后来成了你的饭碗。', effect: { know: 4, rel: 2 } },
+    ],
+  },
+  {
+    id: 'cn-chunyun', type: 'log', minAge: 18, maxAge: 60, weight: 10, once: false,
+    cond: s => s.country === 'china' && s.region === '城市',
+    text: '抢到票的那一夜你在手机前守到零点。绿皮车摇四十个小时，就为年三十那顿饭。',
+    source: '春运全国跨区域人员流动量约 90 亿人次（交通运输部）',
+    effect: { rel: 3, hap: 2, hp: -1 },
+  },
+  {
+    id: 'cn-migrate', type: 'choice', minAge: 18, maxAge: 20, weight: 16,
+    cond: s => s.country === 'china' && s.region === '乡村' && !s.inSchool,
+    title: '进城，还是留下',
+    text: '村里的同龄人一半都进城了。县城有份安稳但寡淡的工作，城里的工地和电子厂工资高得多。',
+    source: '中国农民工总量约 2.97 亿人（国家统计局）',
+    options: [
+      { label: '进城去，工地或工厂', outcome: '你在流水线上站稳了脚跟，宿舍的床板硬，但工资是真的。', effect: { money: 2200, know: 2, rel: -2, hp: -2 } },
+      { label: '留在县城，离家近', outcome: '你守着父母和熟人社会，日子平顺，偶尔刷到城里的视频会多看两眼。', effect: { rel: 4, hap: 2, money: 800 } },
+    ],
+  },
+  {
+    id: 'cn-waimai', type: 'choice', minAge: 18, maxAge: 40, weight: 13,
+    cond: s => s.country === 'china' && s.region === '城市' && !s.job && s.wealthIdx <= 2,
+    title: '先跑着外卖再说',
+    text: '工作一时半会儿没着落，先注册个骑手过渡：电动车是租的，头盔是平台发的。',
+    source: '中国外卖骑手规模超过 1000 万人（相关行业协会估算）',
+    options: [
+      { label: '穿上马甲跑单', outcome: '系统派单的电马达声成了你的背景音，一个雨夜能多挣八十。', effect: { money: 2000, hp: -3, rel: -1 } },
+      { label: '再找找别的事', outcome: '你靠积蓄又撑了两个月，终于等到了一份坐办公室的活。', effect: { know: 2, money: -400, hap: -1 } },
+    ],
+  },
+  {
+    id: 'cn-35-crisis', type: 'log', minAge: 35, maxAge: 45, weight: 9,
+    cond: s => s.country === 'china' && s.job,
+    text: '招聘启事上「35 岁以下」四个字越看越扎眼。你把简历里的出生年份又删了又填。',
+    source: '「35 岁门槛」为中国就业市场特有现象，近年引发广泛讨论',
+    effect: { hap: -3, know: 1 },
+  },
+  {
+    id: 'cn-square-dance', type: 'log', minAge: 55, maxAge: 75, weight: 11,
+    cond: s => s.country === 'china',
+    text: '傍晚的广场，音响一响，你和老姐妹们排成方阵跳了一个钟头。',
+    source: '中国广场舞参与人数约 1 亿人（国家体育总局调研）',
+    effect: { hp: 2, rel: 3, hap: 2 },
+  },
+  {
+    id: 'cn-demolition', type: 'choice', minAge: 40, maxAge: 60, weight: 12,
+    cond: s => s.country === 'china' && s.region === '城市',
+    title: '老屋上的「拆」字',
+    text: '片区改造的红头文件贴上了墙，老屋上画了个圈「拆」字。签字还是不签，邻居们分成了两派。',
+    source: '1990-2020 年中国城镇化率从 26% 升至 64%（世界银行）',
+    options: [
+      { label: '早签早搬，拿补偿款', outcome: '你搬进了远一点的新房，银行卡里多了一串数字，老邻居散了。', effect: { money: 9000, rel: -3, hap: 2 } },
+      { label: '再等等，谈更好的条件', outcome: '多磨了大半年，补偿多了一点点，但搬家时心里还是空落落的。', effect: { money: 7000, hap: -1, rel: -2 } },
+    ],
+  },
+  {
+    id: 'cn-livestream', type: 'log', minAge: 18, maxAge: 40, weight: 9,
+    cond: s => s.country === 'china',
+    text: '你在直播间抢到了九块九包邮的抽纸，省下的钱换成了两杯奶茶。',
+    source: '中国网络直播用户规模超 8 亿，电商直播年成交额数万亿元（CNNIC）',
+    effect: { hap: 2, money: -200 },
+  },
+  {
+    id: 'cn-insurance', type: 'log', minAge: 30, maxAge: 60, weight: 9, once: false,
+    cond: s => s.country === 'china' && s.region === '乡村',
+    text: '村里的干部又来动员缴城乡居民医保：一年几百块，住院能报一半。',
+    source: '中国基本医疗保险参保人数超 13 亿，参保率约 95%（国家医保局）',
+    effect: { money: -150, hp: 2 },
+  },
+  {
+    id: 'cn-buxiban', type: 'log', minAge: 12, maxAge: 16, weight: 10,
+    cond: s => s.country === 'china' && s.inSchool && s.wealthIdx >= 2,
+    text: '晚上九点，补习班下课。你在电动车上啃着包子，书包里的卷子还有三张没订正。',
+    source: '「双减」前中国 K12 校外培训市场年均规模约 8000 亿元',
+    effect: { know: 4, hap: -3, hp: -1 },
+  },
+  {
+    id: 'cn-smartphone-senior', type: 'log', minAge: 60, maxAge: 80, weight: 10,
+    cond: s => s.country === 'china',
+    text: '孙女教会了你用智能手机：视频通话、看短视频、发语音，你一样样学得认真。',
+    source: '中国 60 岁以上网民规模超 1.5 亿（CNNIC）',
+    effect: { know: 2, hap: 3, rel: 2 },
+  },
+  {
+    id: 'cn-homecoming', type: 'log', minAge: 6, maxAge: 14, weight: 8,
+    cond: s => s.country === 'china' && s.region === '乡村' && s.wealthIdx <= 2,
+    text: '爸妈又要出去打工了。你抓着车窗框不放，最后还是被外婆抱了下来。',
+    source: '中国农村留守儿童峰值时期约 6100 万人（全国妇联报告）',
+    effect: { rel: -2, hap: -4, know: 1 },
+  },
+];
+
+// 印度补位
+const IN = [
+  {
+    id: 'in-ipl-night', type: 'log', minAge: 8, maxAge: 45, weight: 10,
+    cond: s => s.country === 'india',
+    text: '板球联赛决赛之夜，整个街区都聚在茶摊的电视机前，六分球一出现满街都在放炮。',
+    source: '印度板球超级联赛（IPL）决赛观众超 4 亿人次',
+    effect: { hap: 3, rel: 2 },
+  },
+  {
+    id: 'in-train', type: 'log', minAge: 16, maxAge: 50, weight: 9,
+    cond: s => s.country === 'india',
+    text: '你把行李从车窗塞进去，再把自己也塞了进去。车门框上挂满了人，火车开动了。',
+    source: '印度铁路日均运送乘客超 2300 万人次（印度铁路部）',
+    effect: { hap: -2, hp: -1, know: 1 },
+  },
+  {
+    id: 'in-it-choice', type: 'choice', minAge: 18, maxAge: 18, weight: 15,
+    cond: s => s.country === 'india' && s.wealthIdx >= 2,
+    title: '十八岁，代码改变命运',
+    text: '学长从班加罗尔回乡，讲起软件园区里的工资数字。理工科的同学都在往计算机专业挤。',
+    source: '印度 IT 服务业年营收约 2500 亿美元，直接就业超 500 万人（NASSCOM）',
+    options: [
+      { label: '挤进计算机专业', outcome: '你在闷热的宿舍里刷了四年题，毕业进了一家外包公司，从此家里有了第一条中产的缝。', effect: { know: 8, money: 3000, hap: -1 } },
+      { label: '选了自己真正喜欢的文科', outcome: '你读得快乐，但毕业后的招聘会上，你的专业对口岗位一只手数得过来。', effect: { know: 5, hap: 3, money: 500 } },
+    ],
+  },
+  {
+    id: 'in-dowry', type: 'choice', minAge: 20, maxAge: 30, weight: 12,
+    cond: s => s.country === 'india' && s.gender === 'male' && s.siblings.some(x => x.gender === 'female'),
+    title: '妹妹的婚礼',
+    text: '妹妹到了出嫁的年纪。对方家里开出的嫁妆清单，抵得上家里十年的积蓄。',
+    source: '印度嫁妆相关冲突年均致死数千人（印度国家犯罪记录局）',
+    options: [
+      { label: '全家举债凑嫁妆', outcome: '婚礼办得体面，家里的债要还很多年，妹妹出嫁那天母亲哭湿了纱丽。', effect: { money: -3000, rel: 3, hap: -2 } },
+      { label: '支持妹妹自己选，嫁妆免谈', outcome: '两家人闹得很难看，但妹妹说这辈子第一次为自己做了主。', effect: { rel: -2, hap: 2 } },
+    ],
+  },
+  {
+    id: 'in-monsoon', type: 'log', minAge: 8, maxAge: 60, weight: 10,
+    cond: s => s.country === 'india' && s.region === '乡村',
+    text: '季风的第一场雨落下来，整个村子都跑到田埂上，仰着脸让雨浇透。',
+    source: '印度约 70% 的降水依赖季风，直接关系数亿农户生计（印度气象局）',
+    effect: { hap: 3, rel: 2 },
+  },
+  {
+    id: 'in-girl-study', type: 'log', minAge: 6, maxAge: 12, weight: 9,
+    cond: s => s.country === 'india' && s.gender === 'female' && s.inSchool,
+    text: '你走四公里去上学，书包里除了课本还有干粮。老师说，坚持读完，世界会不一样。',
+    source: '印度女性识字率约 70%，男性约 84%（印度人口普查）',
+    effect: { know: 3, hp: -1 },
+  },
+  {
+    id: 'in-hospital', type: 'log', minAge: 30, maxAge: 70, weight: 9,
+    cond: s => s.country === 'india' && s.wealthIdx <= 2,
+    text: '陪父亲去公立医院，天没亮就去排队，走廊里加满了床，天亮才排到号。',
+    source: '印度每千人医院床位约 0.5 张，为全球最低之列（世界银行）',
+    effect: { hp: 1, money: -80, hap: -1 },
+  },
+  {
+    id: 'in-aadhaar', type: 'log', minAge: 5, maxAge: 18, weight: 8,
+    cond: s => s.country === 'india',
+    text: '你按了指纹、拍了照，拿到了一张印着 12 位数字的身份卡。从此政府在系统里「认识」你。',
+    source: '印度 Aadhaar 数字身份系统覆盖超 13 亿人，全球最大',
+    effect: { know: 2 },
+  },
+];
+
+// 通用事件
+const COMMON = [
+  {
+    id: 'gen-myopia', type: 'log', minAge: 8, maxAge: 16, weight: 12,
+    cond: s => ['china', 'india'].includes(s.country),
+    text: '黑板越来越模糊，你配了人生第一副眼镜，从此鼻梁上多了两个小坑。',
+    source: '东亚青少年近视率超过 80%，为全球最高（Nature 2015）',
+    effect: { know: 2, money: -150 },
+  },
+  {
+    id: 'gen-layoff', type: 'log', minAge: 30, maxAge: 55, weight: 8,
+    cond: s => s.job,
+    text: '公司「优化」的名单出来了，你的工位邻居也在上面。请他吃了顿散伙饭。',
+    source: '全球每年仍有数千万岗位因经济波动消失（ILO）',
+    effect: { hap: -4, money: -500 },
+  },
+  {
+    id: 'gen-nightshift', type: 'log', minAge: 25, maxAge: 45, weight: 8,
+    cond: s => s.job,
+    text: '为了夜班津贴，你连着上了三个月夜班，生物钟彻底乱了，眼圈黑得像熊猫。',
+    source: '世界约五分之一的劳动者从事轮班或夜间工作（ILO）',
+    effect: { money: 1000, hp: -3, hap: -2 },
+  },
+  {
+    id: 'gen-checkup', type: 'log', minAge: 40, maxAge: 70, weight: 9,
+    cond: s => s.money > 500,
+    text: '年度体检报告出来了：血压偏高，医生让你少盐少酒多走路。',
+    effect: { hp: 1, know: 1, money: -200 },
+  },
+  {
+    id: 'gen-wedding-gift', type: 'log', minAge: 25, maxAge: 40, weight: 10,
+    cond: s => s.country === 'china',
+    text: '老同学的婚礼请柬来了，红包封了两百，看到新郎新娘敬酒时你举杯的手顿了一下。',
+    effect: { money: -200, rel: 2, hap: 1 },
+  },
+];
+
+export const WORLD_EVENTS = [...US, ...IDN, ...PK, ...CN, ...IN, ...COMMON];
