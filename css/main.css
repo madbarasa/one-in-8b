@@ -27,6 +27,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .kicker { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: .14em; margin-bottom: 16px; }
 .hero-title { font-family: var(--serif); font-size: clamp(56px, 11vw, 120px); font-weight: 900; line-height: 1.05; }
 .hero-sub { margin-top: 20px; max-width: 36em; color: var(--ink-2); }
+.hero-crowd { margin: 18px auto 0; width: fit-content; image-rendering: pixelated; opacity: .96; }
 .btn-birth {
   margin-top: 40px; font-family: var(--serif); font-size: 22px; font-weight: 700;
   color: #fff; background: var(--accent); padding: 14px 74px; border-radius: 6px;
@@ -52,6 +53,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .bc-head .t { font-family: var(--serif); font-size: 17px; font-weight: 700; letter-spacing: .2em; }
 .bc-head .no { font-family: var(--mono); font-size: 11px; opacity: .85; }
 .bc-name { font-family: var(--serif); font-size: 42px; font-weight: 900; text-align: center; padding: 26px 18px 4px; }
+.bc-avatar { display: flex; justify-content: center; margin: 14px 0 4px; image-rendering: pixelated; }
 .bc-desc { text-align: center; color: var(--ink-2); padding: 0 30px 16px; font-size: 14px; }
 .bc-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
 .bc-grid > div { padding: 10px 20px; border-bottom: 1px solid var(--line); }
@@ -91,7 +93,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .p-head b { font-family: var(--mono); font-weight: 500; letter-spacing: 0; }
 
 /* 左栏 */
-.id-name { font-family: var(--serif); font-weight: 900; font-size: 22px; }
+.id-avatar { display: flex; justify-content: center; margin: 10px 0 4px; image-rendering: pixelated; }
+.id-name { font-family: var(--serif); font-weight: 900; font-size: 22px; text-align: center; }
 .id-rows { margin-top: 8px; }
 .id-rows > div { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
 .id-rows i { font-style: normal; color: var(--ink-3); font-size: 12px; }
@@ -155,6 +158,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .end-head span:last-child { font-family: var(--mono); font-size: 12px; opacity: .8; }
 .end-life { text-align: center; padding: 28px 24px 10px; }
 .end-life .name { font-family: var(--serif); font-size: 36px; font-weight: 900; }
+.end-tomb { display: flex; justify-content: center; margin: 18px 0 8px; image-rendering: pixelated; }
 .end-life .span { font-family: var(--mono); color: var(--ink-2); margin: 8px 0 16px; font-size: 13px; }
 .end-life .story { text-align: left; color: var(--ink-2); font-size: 14px; padding: 0 16px; }
 .end-cause { margin: 20px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; text-align: center; }
