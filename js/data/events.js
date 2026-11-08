@@ -14,6 +14,16 @@
 
 import { genFamilyName } from './names.js';
 import { WORLD_EVENTS } from './events_world.js';
+import { DEEP_COMMON } from './events_common2.js';
+import { DEEP_CN } from './events_cn2.js';
+import { DEEP_US } from './events_us2.js';
+import { DEEP_IN } from './events_in2.js';
+import { DEEP_ID_PK } from './events_id_pk.js';
+import { DEEP_COMMON2 } from './events_common3.js';
+import { DEEP_CN2 } from './events_cn3.js';
+import { DEEP_EXTRA3 } from './events_extra3.js';
+import { DEEP_LIFE } from './events_common4.js';
+import { DEEP_SEASON } from './events_season.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -641,6 +651,17 @@ add({
 
 // 国别特色事件并入主池
 E.push(...WORLD_EVENTS);
+// 通用人生深化 + 家人动态（v0.5.0）
+E.push(...DEEP_COMMON);
+E.push(...DEEP_CN);
+E.push(...DEEP_US);
+E.push(...DEEP_IN);
+E.push(...DEEP_ID_PK);
+E.push(...DEEP_COMMON2);
+E.push(...DEEP_CN2);
+E.push(...DEEP_EXTRA3);
+E.push(...DEEP_LIFE);
+E.push(...DEEP_SEASON);
 
 export const EVENTS = E;
 

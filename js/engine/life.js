@@ -201,7 +201,8 @@ function pickDistinct(pool, n, rng) {
   const arr = [...pool];
   const out = [];
   while (out.length < n && arr.length) {
-    const i = rng.weighted(arr.map(() => 1));
+    // 按事件 weight 加权抽取（weight 缺省 5）；抽中后移出池
+    const i = rng.weighted(arr.map(e => e.weight || 5));
     out.push(arr.splice(i, 1)[0]);
   }
   return out;
