@@ -180,7 +180,7 @@ export function qx(country, gender, age) {
 }
 
 // ── 年代世界：按出生年的历史生命表（世行 e0/IMR 序列 → lifegen 即时生成）──
-import { WORLD_HISTORY } from './world_history.js';
+import { WORLD_HISTORY, histGet } from './world_history.js';
 const HIST_CACHE = new Map();
 
 function histTableFor(iso3, gender, year) {
@@ -188,17 +188,7 @@ function histTableFor(iso3, gender, year) {
   if (!HIST_CACHE.has(key)) {
     const s = WORLD_HISTORY.series[iso3];
     if (!s) throw new Error(`历史序列缺项: ${iso3}`);
-    const pick = (arr) => {
-      if (!arr) return null;
-      // 目标年缺失则取最接近年份
-      let best = null, bd = 1e9;
-      for (const y of Object.keys(arr)) {
-        const d = Math.abs(+y - year);
-        if (d < bd) { bd = d; best = arr[y]; }
-      }
-      return best;
-    };
-    const lm = pick(s.leMale) || 60, lf = pick(s.leFemale) || 63, imr = pick(s.imr) || 40;
+    const lm = histGet(s.leMale, year) || 60, lf = histGet(s.leFemale, year) || 63, imr = histGet(s.imr, year) || 40;
     HIST_CACHE.set(key, genCountryTables(lm, lf, imr)[gender]);
   }
   return HIST_CACHE.get(key);
@@ -223,16 +213,7 @@ export function lifeExpAt(iso3, birthYear, fallback) {
   if (!birthYear || birthYear >= 2026) return fallback;
   const s = WORLD_HISTORY.series[iso3];
   if (!s) return fallback;
-  const pick = (arr) => {
-    if (!arr) return null;
-    let best = null, bd = 1e9;
-    for (const y of Object.keys(arr)) {
-      const d = Math.abs(+y - birthYear);
-      if (d < bd) { bd = d; best = arr[y]; }
-    }
-    return best;
-  };
-  const lm = pick(s.leMale), lf = pick(s.leFemale);
+  const lm = histGet(s.leMale, birthYear), lf = histGet(s.leFemale, birthYear);
   if (lm == null) return fallback;
   return +(Math.round(((lm + lf) / 2) * 10) / 10).toFixed(1);
 }

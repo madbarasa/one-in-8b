@@ -2,7 +2,7 @@
 // v0.8.0 支持年代世界：birthYear < 2026 时按该年真实出生数加权（世行 1960-2025 序列）
 import { COUNTRIES, BIRTH_WEIGHTS } from '../data/countries.js';
 import { genName, genFamilyName } from '../data/names.js';
-import { WORLD_HISTORY } from '../data/world_history.js';
+import { WORLD_HISTORY, histGet } from '../data/world_history.js';
 import { lifeExpAt } from '../data/lifetables.js';
 
 // ── Gini 收入分布：对数正态反解 ──
@@ -41,12 +41,7 @@ export function historicalWeights(year) {
   return countries.map(c => {
     const s = WORLD_HISTORY.series[c.iso3];
     if (!s || !s.births) return c.birthShare;
-    let best = null, bestDist = 1e9;
-    for (const y of Object.keys(s.births)) {
-      const d = Math.abs(+y - year);
-      if (d < bestDist) { bestDist = d; best = s.births[y]; }
-    }
-    return best != null ? Math.max(1, best) : c.birthShare;
+    return Math.max(1, histGet(s.births, year) || c.birthShare);
   });
 }
 
