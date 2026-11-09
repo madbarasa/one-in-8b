@@ -14,21 +14,21 @@ const REFLECT_AGES = [5, 15, 30, 50, 70];
 // ── 首页 ──
 function goHome() {
   stopLoop();
-  renderHome(() => goBirthCard());
+  renderHome((year) => goBirthCard(year));
 }
 
 // ── 出生抽签 → 登记卡 ──
-function goBirthCard() {
+function goBirthCard(year) {
   const rng = makeRng(randomSeed());
-  const year = new Date().getFullYear();
-  const birth = rollBirth(rng, year);
+  const birthYear = year || new Date().getFullYear();
+  const birth = rollBirth(rng, birthYear);
   st = createLifeState(birth);
-  const no = birthCardNo(rng, st.code, year);
+  const no = birthCardNo(rng, st.code, birthYear);
   st.cardNo = no;
-  // 同龄人陪跑：同一秒出生的另外 4 个婴儿（全球随机，独立人生）
+  // 同龄人陪跑：同一秒出生的另外 4 个婴儿（全球随机，独立人生；历史世界同年代）
   peers = [];
   for (let i = 0; i < 4; i++) {
-    const pb = rollBirth(makeRng(randomSeed()), year);
+    const pb = rollBirth(makeRng(randomSeed()), birthYear);
     peers.push(createLifeState(pb));
   }
   renderBirthCard(birth, no, () => goGame());

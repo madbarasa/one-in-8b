@@ -24,6 +24,12 @@ export function renderHome(onBirth) {
         <div class="wc-cell"><b id="wc-born">0</b><span>打开页面以来出生的婴儿</span></div>
         <div class="wc-cell"><b id="wc-dead">0</b><span>同期离开这个世界的人</span></div>
       </div>
+      <div class="era-picker">
+        <label>出生年代：<b id="era-label">今日世界（2026）</b></label>
+        <input type="range" id="era-slider" min="1950" max="2026" value="2026" step="1" />
+        <div class="era-marks"><span>1950</span><span>1975</span><span>2000</span><span id="era-mark-now">2026</span></div>
+        <p class="era-note" id="era-note">默认投生此刻。拖动滑块，你可以选择出生在过去的任何一个年份——按那一年的真实统计出生、成长、老去。</p>
+      </div>
       <button class="btn-birth" id="btn-birth">出　生</button>
       <div class="hero-crowd" title="五国群像">${crowdSVG()}</div>
       <p class="home-note">复刻研究版 · 数据来自世界银行 API / UN WPP / WHO · 覆盖 217 个国家与地区 · 全球新生儿 100% 抽样空间</p>
@@ -50,7 +56,27 @@ export function renderHome(onBirth) {
       <p class="src">全球每年出生约 1.34 亿人（World Bank SP.DYN.CBRT.IN × SP.POP.TOTL，2024）</p>
     </div>
   </div>`;
-  document.getElementById('btn-birth').onclick = onBirth;
+  document.getElementById('btn-birth').onclick = () => {
+    const year = +document.getElementById('era-slider').value;
+    onBirth(year);
+  };
+  // 年代选择器文案
+  const slider = document.getElementById('era-slider');
+  slider.oninput = () => {
+    const y = +slider.value;
+    document.getElementById('era-label').textContent = y >= 2026 ? '今日世界（2026）' : y + ' 年的世界';
+    const notes = {
+      1950: '战后婴儿潮。全球预期寿命不到 50 岁，天花还没被根除。',
+      1960: '非洲独立潮、太空竞赛、和大饥荒的记忆。',
+      1975: '越南战争落幕，中国即将改革开放。',
+      1990: '冷战结束、互联网黎明、天花已被根除。',
+      2010: '智能手机时代的第一批孩子。',
+    };
+    const near = Object.keys(notes).map(Number).reduce((a, b) => Math.abs(b - y) < Math.abs(a - y) ? b : a);
+    document.getElementById('era-note').textContent = y >= 2026
+      ? '默认投生此刻。拖动滑块，你可以选择出生在过去的任何一个年份——按那一年的真实统计出生、成长、老去。'
+      : '你将按 ' + y + ' 年的真实统计出生：当年的出生分布、预期寿命、婴儿死亡率。活得过童年，才谈得上人生。';
+  };
   // 实时世界计数器：全球每秒出生约 4.25、死亡约 1.96（世行口径折算）
   let born = 0, dead = 0;
   const elB = document.getElementById('wc-born'), elD = document.getElementById('wc-dead');
@@ -74,6 +100,7 @@ export function renderBirthCard(b, cardNo, onStart) {
     <div class="birth-card">
       <div class="bc-head"><span class="t">出生登记</span><span class="no">No. ${cardNo}</span></div>
       <div class="bc-name">${esc(b.name)}</div>
+      ${b.historical ? `<span class="bc-era-tag">${b.birthYear} 年 · 历史世界</span>` : ''}
       <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72, b.group)}</div>
       <p class="bc-desc">${b.birthYear} 年，${b.countryName}${b.region}，${esc(b.father.job)}与${esc(b.mother.job)}的家庭，是个${g}。</p>
       <div class="bc-grid">

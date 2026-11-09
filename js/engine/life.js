@@ -1,5 +1,5 @@
 // 人生推进引擎：逐年模拟 + 事件调度 + 死亡判定
-import { qx } from '../data/lifetables.js';
+import { qxYear } from '../data/lifetables.js';
 import { COUNTRIES } from '../data/countries.js';
 import { EVENTS, filterEvents } from '../data/events.js';
 import { genFamilyName } from '../data/names.js';
@@ -67,8 +67,8 @@ export function advanceYear(st) {
   // 重心效果（3 岁起有重心）
   applyFocus(st);
 
-  // 死亡判定（生命表 qx + 健康-50 以下加成风险）
-  const baseQx = qx(st.country, st.gender, st.age);
+  // 死亡判定（生命表 qx + 健康-50 以下加成风险；年代世界按出生年历史表）
+  const baseQx = qxYear(st.country, st.gender, st.age, st.birthYear);
   const hpRisk = st.stats.hp < 50 ? (50 - st.stats.hp) * 0.002 : 0;
   if (st.rng.chance(baseQx + hpRisk)) {
     die(st);

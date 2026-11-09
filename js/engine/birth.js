@@ -1,6 +1,9 @@
 // 出生抽签：按真实统计权重生成一个「此刻出生的婴儿」
+// v0.8.0 支持年代世界：birthYear < 2026 时按该年真实出生数加权（世行 1960-2025 序列）
 import { COUNTRIES, BIRTH_WEIGHTS } from '../data/countries.js';
 import { genName, genFamilyName } from '../data/names.js';
+import { WORLD_HISTORY } from '../data/world_history.js';
+import { lifeExpAt } from '../data/lifetables.js';
 
 // ── Gini 收入分布：对数正态反解 ──
 // σ = √2 · Φ⁻¹((G+1)/2)；收入 = exp(μ + σ·z)，μ 由人均 GDP 定
@@ -31,9 +34,25 @@ export function householdIncome(gdpPpp, gini, wealthIdx) {
   return { ppp, usd };
 }
 
+// 历史年份出生权重（世行 births 序列，缺失取最近年份，1960 前用 1960 值）
+export function historicalWeights(year) {
+  if (!year || year >= 2026) return BIRTH_WEIGHTS;
+  const countries = Object.values(COUNTRIES);
+  return countries.map(c => {
+    const s = WORLD_HISTORY.series[c.iso3];
+    if (!s || !s.births) return c.birthShare;
+    let best = null, bestDist = 1e9;
+    for (const y of Object.keys(s.births)) {
+      const d = Math.abs(+y - year);
+      if (d < bestDist) { bestDist = d; best = s.births[y]; }
+    }
+    return best != null ? Math.max(1, best) : c.birthShare;
+  });
+}
+
 export function rollBirth(rng, birthYear) {
-  // 1. 抽国家（按全球新生儿占比）
-  const ci = rng.weighted(BIRTH_WEIGHTS);
+  // 1. 抽国家（按该年全球新生儿占比；今日世界用最新值）
+  const ci = rng.weighted(historicalWeights(birthYear));
   const country = Object.values(COUNTRIES)[ci];
 
   // 2. 抽性别（出生性别比）
@@ -81,10 +100,11 @@ export function rollBirth(rng, birthYear) {
     region: region.name, gender, wealthIdx, wealth, name, religion,
     father, mother, siblings,
     stats, seed: rng, rng,
-    lifeExpectancy: country.lifeExp,
+    lifeExpectancy: lifeExpAt(country.iso3, birthYear, country.lifeExp),
     gdpPpp: country.gdpPpp,
     group: country.group,
     culture: country.culture,
+    historical: birthYear < 2026,
     household: householdIncome(country.gdpPpp, country.gini, wealthIdx),
   };
 }

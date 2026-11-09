@@ -178,3 +178,61 @@ export function qx(country, gender, age) {
   }
   throw new Error(`生命表缺项: ${country}/${gender}/${age}`);
 }
+
+// ── 年代世界：按出生年的历史生命表（世行 e0/IMR 序列 → lifegen 即时生成）──
+import { WORLD_HISTORY } from './world_history.js';
+const HIST_CACHE = new Map();
+
+function histTableFor(iso3, gender, year) {
+  const key = iso3 + '/' + gender + '/' + year;
+  if (!HIST_CACHE.has(key)) {
+    const s = WORLD_HISTORY.series[iso3];
+    if (!s) throw new Error(`历史序列缺项: ${iso3}`);
+    const pick = (arr) => {
+      if (!arr) return null;
+      // 目标年缺失则取最接近年份
+      let best = null, bd = 1e9;
+      for (const y of Object.keys(arr)) {
+        const d = Math.abs(+y - year);
+        if (d < bd) { bd = d; best = arr[y]; }
+      }
+      return best;
+    };
+    const lm = pick(s.leMale) || 60, lf = pick(s.leFemale) || 63, imr = pick(s.imr) || 40;
+    HIST_CACHE.set(key, genCountryTables(lm, lf, imr)[gender]);
+  }
+  return HIST_CACHE.get(key);
+}
+
+// 出生年的死亡概率（年代世界核心）：birthYear ≥ 2026 走现行表，否则走当年历史表
+export function qxYear(countryId, gender, age, birthYear) {
+  if (!birthYear || birthYear >= 2026) return qx(countryId, gender, age);
+  // 手工国 id（india）→ 世行 iso3（IND）
+  const iso3 = COUNTRIES_MAP[countryId]?.iso3 || countryId.toUpperCase();
+  const table = histTableFor(iso3, gender, birthYear);
+  if (age > 115) return 1;
+  if (table[age] !== undefined) return table[age];
+  for (let a = age - 1; a >= 0; a--) {
+    if (table[a] !== undefined) return table[a];
+  }
+  throw new Error(`历史生命表缺项: ${countryId}/${gender}/${age}/${birthYear}`);
+}
+
+// 出生年的预期寿命（出生卡显示用）
+export function lifeExpAt(iso3, birthYear, fallback) {
+  if (!birthYear || birthYear >= 2026) return fallback;
+  const s = WORLD_HISTORY.series[iso3];
+  if (!s) return fallback;
+  const pick = (arr) => {
+    if (!arr) return null;
+    let best = null, bd = 1e9;
+    for (const y of Object.keys(arr)) {
+      const d = Math.abs(+y - birthYear);
+      if (d < bd) { bd = d; best = arr[y]; }
+    }
+    return best;
+  };
+  const lm = pick(s.leMale), lf = pick(s.leFemale);
+  if (lm == null) return fallback;
+  return +(Math.round(((lm + lf) / 2) * 10) / 10).toFixed(1);
+}
