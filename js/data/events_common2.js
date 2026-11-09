@@ -169,3 +169,44 @@ L('child-away', 50, 75, 6, '孩子在远方定居了。视频里的 TA 越来越
 L('child-support', 65, 90, 6, '孩子每周都给你打电话，逢年过节雷打不动地往家寄东西。', { hap: 4, rel: 2, money: 300 }, null, { cond: s => s.children.length > 0 && s.age >= 65 });
 
 // 家人动态合计约 60 条，加上学业/情感/职场/健康/财务/时代约 160 条
+
+// ── 移民抉择（官方同款：出国改变一生）──
+// 仅面向发展中地区的生成国；目标国按现实移民流：撒哈拉→欧美/拉美、南亚→海湾/欧美、东南亚→东亚
+const MIGRATE_TARGETS = {
+  SSF: ['fra', 'usa', 'gbr', 'bra', 'can'],
+  SAS: ['are', 'sau', 'gbr', 'usa', 'deu'],
+  MENA: ['deu', 'tur', 'sau', 'fra'],
+  LCN: ['usa', 'esp', 'can', 'prt'],
+  EAS: ['kor', 'jpn', 'sgp', 'usa'],
+};
+import { COUNTRIES as _C } from './countries.js';
+DEEP_COMMON.push({
+  id: 'move-abroad', type: 'choice', minAge: 18, maxAge: 38,
+  cond: s => s.group && ['SSF', 'SAS', 'MENA', 'LCN'].includes(s.group) && COUNTRIES_SAFE[s.country] && !COUNTRIES_SAFE[s.country].handmade5,
+  title: '一张单程票',
+  text: '有人劝你出国碰碰运气——「在那边，一个月能挣这边一年的钱」。但语言、身份、和家人，都要重新开始。',
+  source: '国际移民总量约 2.8 亿人，占全球人口 3.6%（UN DESA）',
+  options: [
+    {
+      label: '走。趁着年轻去看更大的世界',
+      outcome: (st) => {
+        const pool = (MIGRATE_TARGETS[st.group] || ['usa', 'deu']).filter(c => COUNTRIES_SAFE[c]);
+        const target = COUNTRIES_SAFE[pool[st.rng.int(0, pool.length)]] || COUNTRIES_SAFE['usa'];
+        st.country = target.id; st.countryName = target.name; st.code = target.code;
+        st.group = target.group; st.gdpPpp = target.gdpPpp; st.region = '城市';
+        st.migrated = true;
+        return `你到了${target.name}。头一年听不懂也不习惯，但你开始把这里叫「家」——带着两个家的人。`;
+      },
+      effect: { hap: 2, know: 3, rel: -3, money: -800 },
+    },
+    {
+      label: '留下。这里有爸妈和熟悉的一切',
+      outcome: '你留下来了。后来你偶尔会想那张没买的票——但饭桌上的笑声是真的。',
+      effect: { rel: 2, hap: 1 },
+    },
+  ],
+});
+// COUNTRIES 引用安全垫（避免命名冲突）
+const COUNTRIES_SAFE = _C;
+// 手工五国不触发移民（有专属国别线）
+for (const c of Object.values(_C)) if (['china', 'india', 'usa', 'indonesia', 'pakistan'].includes(c.id)) c.handmade5 = true;

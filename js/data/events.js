@@ -666,15 +666,26 @@ E.push(...DEEP_SEASON);
 export const EVENTS = E;
 
 // 按年龄过滤 + 条件过滤 + once 过滤
+const classroomOn = () => (typeof localStorage !== 'undefined') && localStorage.getItem('onein8b_classroom') === '1';
+
 export function filterEvents(events, state) {
+  const classroom = classroomOn();
   return events.filter(ev => {
     if (ev.minAge !== undefined && state.age < ev.minAge) return false;
     if (ev.maxAge !== undefined && state.age > ev.maxAge) return false;
     if (ev.once !== false && state.firedEvents.has(ev.id)) return false;
     if (ev.stage && !stageMatch(ev.stage, state.age)) return false;
     if (ev.cond && !ev.cond(state)) return false;
+    // 教室模式：沉重主题事件大幅降权（保留存在感但几乎不触发）
+    if (classroom && ev.sensitive && !state.rng.chance(0.1)) return false;
     return true;
   });
+}
+
+// 敏感主题事件标记（战争/恐袭/成瘾/校园暴力/自我伤害等，教室模式下降权）
+const SENSITIVE_RE = /disaster-|war-|opioid|blast|suicide|siege|massacre|shooter|health-depress|health-anxiety|pk2-terror|us2-parkland|health-selfharm/;
+for (const ev of E) {
+  if (SENSITIVE_RE.test(ev.id)) ev.sensitive = true;
 }
 
 function stageMatch(stage, age) {

@@ -3,7 +3,7 @@
 // 逻辑像素坐标系：小人 16×24，场景 320×210
 
 // ── 五国调色板 ──
-export const PALETTES = {
+const PALETTES = {
   china: {
     name: '中国',
     skyDay: '#a8c8e0', skyNoon: '#c8dcec', skyDusk: '#e8b48a', skyEve: '#585a78',
@@ -49,8 +49,24 @@ const HAIR_OLD = '#c8c8c8';
 // ── 像素小人 ──
 // stage: baby / kid / teen / adult / old；gender: male / female
 // 返回 16×24 viewBox 的 SVG（使用时按容器缩放，image-rendering: pixelated）
-export function avatarSVG(country, gender, stage, size = 16) {
-  const pal = PALETTES[country] || PALETTES.china;
+// 地区组色板（212 个生成国按组 fallback，保持像素皮肤全覆盖）
+const GROUP_PALETTES = {
+  EAS: { skyDay: '#a8c8e0', skyNoon: '#c8dcec', skyDusk: '#e8b48a', skyEve: '#585a78', groundU: '#9aa0a6', groundR: '#8fae72', house: '#c9b89a', roof: '#4a5a6a', accent: '#c83a2a', cloth: '#2a4a7a', clothAlt: '#c83a2a', clothKid: '#4a6a9a', skin: '#e8c49a', hair: '#3a3a40' },
+  SAS: { skyDay: '#e0c8a0', skyNoon: '#e8d8b0', skyDusk: '#e89a60', skyEve: '#4a4060', groundU: '#b0a490', groundR: '#c4a860', house: '#d8c0a0', roof: '#a05a28', accent: '#e87820', cloth: '#e87820', clothAlt: '#188070', clothKid: '#f0a050', skin: '#d8a878', hair: '#2a2a30' },
+  SSF: { skyDay: '#c0d8b8', skyNoon: '#d8e8c0', skyDusk: '#e8a868', skyEve: '#484458', groundU: '#a89070', groundR: '#b09a58', house: '#c8a878', roof: '#8a6838', accent: '#d89830', cloth: '#c87828', clothAlt: '#e8c840', clothKid: '#d8a040', skin: '#8a5a3a', hair: '#1a1a20' },
+  LCN: { skyDay: '#a8d8d0', skyNoon: '#c8e8d8', skyDusk: '#e8b080', skyEve: '#505a70', groundU: '#a0a898', groundR: '#98b060', house: '#d8b890', roof: '#c85a38', accent: '#e89838', cloth: '#e8e0d0', clothAlt: '#2868a8', clothKid: '#e8a858', skin: '#c89868', hair: '#2a2020' },
+  ECS: { skyDay: '#b0c8d8', skyNoon: '#ccd8e0', skyDusk: '#e0a888', skyEve: '#4a5060', groundU: '#98a0a0', groundR: '#88a868', house: '#d0c8b8', roof: '#685848', accent: '#a83828', cloth: '#485868', clothAlt: '#8a4838', clothKid: '#586878', skin: '#e8c49a', hair: '#4a3a2a' },
+  MENA: { skyDay: '#e8d8b0', skyNoon: '#f0e0c0', skyDusk: '#e89858', skyEve: '#454058', groundU: '#c0a880', groundR: '#b8a060', house: '#e0d0b0', roof: '#a88858', accent: '#188068', cloth: '#e8e4d8', clothAlt: '#188068', clothKid: '#e8d888', skin: '#d8b088', hair: '#2a2a2a' },
+  NAC: { skyDay: '#b8d0e8', skyNoon: '#d0e0f0', skyDusk: '#e8a878', skyEve: '#485068', groundU: '#a0a8a8', groundR: '#a0b070', house: '#d8d0c0', roof: '#585860', accent: '#3860a8', cloth: '#3860a8', clothAlt: '#b83838', clothKid: '#5868b8', skin: '#e8c49a', hair: '#5a4028' },
+};
+
+// 皮肤解析：国名直查 → 组 fallback → 中国色板兜底
+function paletteFor(countryId, group) {
+  return PALETTES[countryId] || (group && GROUP_PALETTES[group]) || PALETTES.china;
+}
+
+export function avatarSVG(country, gender, stage, size = 16, group = null) {
+  const pal = paletteFor(country, group);
   const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
   const alt = pal.clothAlt;
   const isOld = stage === 'old';
@@ -109,7 +125,7 @@ export function avatarSVG(country, gender, stage, size = 16) {
 // ── 场景生成器 ──
 // 维度：国家 × 城乡 × 人生阶段（天色） × 家庭在场（配偶/子女）
 export function sceneSVG(st) {
-  const pal = PALETTES[st.country] || PALETTES.china;
+  const pal = paletteFor(st.country, st.group);
   const urban = st.region === '城市';
   const age = st.age;
   // 天色：童年晨光 → 成年正午 → 晚年黄昏（80+ 夜幕）
@@ -205,7 +221,7 @@ export function sceneSVG(st) {
 
 // 场景内的站立小人（比头像大，贴地面）
 function person(country, gender, stage, x, groundY, scale) {
-  const pal = PALETTES[country] || PALETTES.china;
+  const pal = paletteFor(country);
   const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
   const alt = pal.clothAlt;
   const isOld = stage === 'old';
@@ -244,7 +260,7 @@ export function crowdSVG() {
 
 // ── 死亡结算：像素墓碑 ──
 export function tombstoneSVG(st) {
-  const pal = PALETTES[st.country] || PALETTES.china;
+  const pal = paletteFor(st.country, st.group);
   const R = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
   const d = st.deathInfo || {};
   return `<svg viewBox="0 0 120 100" shape-rendering="crispEdges" style="width:120px;height:100px">

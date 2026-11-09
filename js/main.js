@@ -2,12 +2,14 @@
 import { makeRng, randomSeed } from './rng.js';
 import { rollBirth, birthCardNo } from './engine/birth.js';
 import { createLifeState, advanceYear, resolveChoice } from './engine/life.js';
-import { renderHome, renderBirthCard, renderGameShell, renderEnd, updateGame, showChoice, renderFocus } from './ui/render.js';
+import { renderHome, renderBirthCard, renderGameShell, renderEnd, updateGame, showChoice, renderFocus, showReflect, renderPeers } from './ui/render.js';
 
 let st = null;
+let peers = [];      // 同龄人陪跑（同秒出生的另外 4 个婴儿）
 let speed = 1;
 let timer = null;
 let autoMode = false;
+const REFLECT_AGES = [5, 15, 30, 50, 70];
 
 // ── 首页 ──
 function goHome() {
@@ -23,6 +25,12 @@ function goBirthCard() {
   st = createLifeState(birth);
   const no = birthCardNo(rng, st.code, year);
   st.cardNo = no;
+  // 同龄人陪跑：同一秒出生的另外 4 个婴儿（全球随机，独立人生）
+  peers = [];
+  for (let i = 0; i < 4; i++) {
+    const pb = rollBirth(makeRng(randomSeed()), year);
+    peers.push(createLifeState(pb));
+  }
   renderBirthCard(birth, no, () => goGame());
 }
 
@@ -34,6 +42,7 @@ function goGame() {
     onAuto: toggleAuto,
   });
   updateGame(st);
+  renderPeers(peers);
   startLoop();
 }
 
@@ -62,7 +71,30 @@ function tickYear() {
 
 function doYear() {
   const r = advanceYear(st);
+  // 同龄人同步推进（纯模拟：自动选第一选项、无 UI）
+  for (const p of peers) {
+    if (!p.alive) continue;
+    let guard = 0;
+    while (p.alive && guard++ < 6) {
+      const pr = advanceYear(p);
+      if (pr.choice) { resolveChoice(p, pr.choice, pr.choice.options[0]); continue; }
+      if (pr.died) { p.alive = false; break; }
+      break;
+    }
+    if (p.alive === false && p.deathInfo) p.alive = false;
+  }
+  renderPeers(peers);
   if (r.died) { onDeath(); return; }
+  // 反思暂停点：5/15/30/50/70 岁（auto 模式下不暂停，仅标记）
+  if (REFLECT_AGES.includes(st.age) && !st.reflectDone?.has(st.age)) {
+    st.reflectDone = st.reflectDone || new Set();
+    st.reflectDone.add(st.age);
+    if (!autoMode) {
+      stopLoop();
+      showReflect(st, () => startLoop());
+      return;
+    }
+  }
   if (r.choice) {
     st.awaitChoice = true;
     stopLoop();
@@ -99,7 +131,26 @@ function stepToChoice() {
     guard += 1;
     if (guard > 130 || !st.alive) { if (!st.alive) onDeath(); return; }
     const r = advanceYear(st);
+    for (const p of peers) {
+      if (!p.alive) continue;
+      let g2 = 0;
+      while (p.alive && g2++ < 6) {
+        const pr = advanceYear(p);
+        if (pr.choice) { resolveChoice(p, pr.choice, pr.choice.options[0]); continue; }
+        if (pr.died) { p.alive = false; break; }
+        break;
+      }
+    }
+    renderPeers(peers);
     if (r.died) { updateGame(st); onDeath(); return; }
+    // 反思暂停点（step 与 auto 均生效）
+    if (REFLECT_AGES.includes(st.age) && !st.reflectDone?.has(st.age)) {
+      st.reflectDone = st.reflectDone || new Set();
+      st.reflectDone.add(st.age);
+      updateGame(st);
+      showReflect(st, () => { if (autoMode) startLoop(); });
+      return;
+    }
     if (r.choice) {
       updateGame(st);
       st.awaitChoice = true;
@@ -142,7 +193,7 @@ function autoPickFocus() {
 function onDeath() {
   stopLoop();
   updateGame(st);
-  renderEnd(st, () => goHome());
+  renderEnd(st, () => goHome(), peers);
 }
 
 goHome();

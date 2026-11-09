@@ -20,27 +20,50 @@ export function renderHome(onBirth) {
       <div class="kicker">人生模拟 · 随机出生 · 基于真实统计</div>
       <h1 class="hero-title">八十亿分之一</h1>
       <p class="hero-sub">就在此刻，每秒大约有四个婴儿诞生。你将成为其中一个，把仅此一次的人生走到最后。<br>在哪里出生、成为谁的孩子，都无法选择。就像你当初一样。</p>
+      <div class="world-counter">
+        <div class="wc-cell"><b id="wc-born">0</b><span>打开页面以来出生的婴儿</span></div>
+        <div class="wc-cell"><b id="wc-dead">0</b><span>同期离开这个世界的人</span></div>
+      </div>
       <button class="btn-birth" id="btn-birth">出　生</button>
       <div class="hero-crowd" title="五国群像">${crowdSVG()}</div>
-      <p class="home-note">复刻研究版 · 数据近似整理自 UN WPP 2024 / WHO / 世界银行 · 已覆盖五国（全球新生儿约 35%）</p>
+      <p class="home-note">复刻研究版 · 数据来自世界银行 API / UN WPP / WHO · 覆盖 217 个国家与地区 · 全球新生儿 100% 抽样空间</p>
+      <div class="home-opts">
+        <label class="opt-classroom"><input type="checkbox" id="opt-classroom"> 教室模式（缓和沉重主题，适合课堂）</label>
+      </div>
     </div>
     <div class="home-distro">
       <h2>如果你是此刻出生的婴儿</h2>
-      ${Object.values(COUNTRIES).map(c => `
+      <p class="distro-sub">出生地按各国每年新生儿数量加权抽取——世界银行最新统计，覆盖 217 个国家与地区</p>
+      <div class="distro-top">
+      ${Object.values(COUNTRIES).filter(c => !c.generated).map(c => `
         <div class="distro-row">
           <span class="d-name">${c.name}</span>
-          <div class="d-bar"><i style="width:${c.birthShare * 5}%"></i></div>
+          <div class="d-bar"><i style="width:${Math.max(2, c.birthShare * 5)}%"></i></div>
           <span class="d-pct">${c.birthShare}%</span>
         </div>`).join('')}
       <div class="distro-row">
-        <span class="d-name">其余国家与地区</span>
+        <span class="d-name">其余 212 个国家与地区</span>
         <div class="d-bar"><i style="width:${(100 - 35) * 0.95}%"></i></div>
-        <span class="d-pct">65%</span>
+        <span class="d-pct">65.3%</span>
       </div>
-      <p class="src">全球 2023 年出生约 1.32 亿人（UN《世界人口展望 2024》）</p>
+      </div>
+      <p class="src">全球每年出生约 1.34 亿人（World Bank SP.DYN.CBRT.IN × SP.POP.TOTL，2024）</p>
     </div>
   </div>`;
   document.getElementById('btn-birth').onclick = onBirth;
+  // 实时世界计数器：全球每秒出生约 4.25、死亡约 1.96（世行口径折算）
+  let born = 0, dead = 0;
+  const elB = document.getElementById('wc-born'), elD = document.getElementById('wc-dead');
+  window.__wcTimer = setInterval(() => {
+    if (!elB) { clearInterval(window.__wcTimer); return; }
+    born += 4.25; dead += 1.96;
+    elB.textContent = Math.floor(born).toLocaleString();
+    elD.textContent = Math.floor(dead).toLocaleString();
+  }, 1000);
+  // 教室模式开关
+  const cb = document.getElementById('opt-classroom');
+  cb.checked = localStorage.getItem('onein8b_classroom') === '1';
+  cb.onchange = () => localStorage.setItem('onein8b_classroom', cb.checked ? '1' : '0');
 }
 
 // ── 出生登记卡 ──
@@ -51,13 +74,15 @@ export function renderBirthCard(b, cardNo, onStart) {
     <div class="birth-card">
       <div class="bc-head"><span class="t">出生登记</span><span class="no">No. ${cardNo}</span></div>
       <div class="bc-name">${esc(b.name)}</div>
-      <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72)}</div>
+      <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72, b.group)}</div>
       <p class="bc-desc">${b.birthYear} 年，${b.countryName}${b.region}，${esc(b.father.job)}与${esc(b.mother.job)}的家庭，是个${g}。</p>
       <div class="bc-grid">
         <div><i>性别</i><b>${g}</b></div>
         <div><i>出生国家</i><b>${b.countryName}</b></div>
         <div><i>出生地</i><b>${b.region}</b></div>
         <div><i>家境</i><b>${b.wealth}</b></div>
+        <div><i>家庭年收入</i><b>${b.household.ppp.toLocaleString()} PPP国际元</b></div>
+        <div><i>按美国物价</i><b>≈ ${b.household.usd.toLocaleString()} 美元</b></div>
         <div><i>父亲</i><b>${esc(b.father.name)} · ${b.father.age}岁</b></div>
         <div><i>母亲</i><b>${esc(b.mother.name)} · ${b.mother.age}岁</b></div>
         <div><i>信仰</i><b>${b.religion}</b></div>
@@ -90,7 +115,7 @@ export function renderGameShell(st, handlers) {
       <aside class="col-left">
         <div class="panel id-card">
           <div class="p-head"><span>身份纪录</span><b>${st.code} ${st.birthYear}</b></div>
-          <div class="id-avatar" id="id-avatar">${avatarSVG(st.country, st.gender, 'baby', 44)}</div>
+          <div class="id-avatar" id="id-avatar">${avatarSVG(st.country, st.gender, "baby", 44, st.group)}</div>
           <div class="id-name">${esc(st.name)}</div>
           <div class="id-rows">
             <div><i>性别</i><b>${st.gender === 'male' ? '男' : '女'}</b></div>
@@ -125,6 +150,10 @@ export function renderGameShell(st, handlers) {
         </div>
       </section>
       <aside class="col-right">
+        <div class="panel peers-panel">
+          <div class="p-head"><span>同一秒出生的他们</span><b>陪你走完一生</b></div>
+          <div id="peers-list"></div>
+        </div>
         <div class="panel family-panel">
           <div class="p-head"><span>家人與生活</span></div>
           <div id="family-rows"></div>
@@ -162,7 +191,7 @@ export function updateGame(st) {
   const job = document.getElementById('id-job'); if (job) job.textContent = st.job || '—';
   // 头像随人生阶段更新
   const av = document.getElementById('id-avatar');
-  if (av) av.innerHTML = avatarSVG(st.country, st.gender, stageOf(st.age), 44);
+  if (av) av.innerHTML = avatarSVG(st.country, st.gender, stageOf(st.age), 44, st.group);
   renderTimeline(st);
   renderFamily(st);
   renderMap(st);
@@ -261,8 +290,23 @@ function stageOf(age) {
   return 'old';
 }
 
-export function renderEnd(st, onRestart) {
+// 各国心理援助热线（求助资源行）
+const HELPLINES = {
+  china: '心理援助热线 12356 · 北京 010-82951332',
+  usa: '988 Suicide & Crisis Lifeline（拨/发 988）',
+  india: 'iCall +91 9152987821 · AASRA +91 9820466726',
+  indonesia: 'Layanan konsili 119 ext 8',
+  pakistan: 'Rozan UAN +92 51 111 533 533',
+};
+
+export function renderEnd(st, onRestart, peers) {
   const d = st.deathInfo;
+  const peerRows = (peers || []).map(p => {
+    const alive = p.alive;
+    const age = alive ? p.age : (p.deathInfo ? p.deathInfo.age : p.age);
+    return `<div class="peer-end-row"><span>${esc(p.name)} · ${esc(p.countryName)}</span><b>${alive ? '仍在人生路上（' + age + '岁）' : age + '岁离世'}</b></div>`;
+  }).join('');
+  const helpline = HELPLINES[st.country] || '全球求助目录 findahelpline.com';
   $app().innerHTML = `
   <div class="screen-end">
     <div class="end-card">
@@ -270,9 +314,14 @@ export function renderEnd(st, onRestart) {
       <div class="end-life">
         <div class="end-tomb">${tombstoneSVG(st)}</div>
         <div class="name">${esc(st.name)}</div>
-        <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${st.countryName}${st.region}</div>
+        <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${esc(st.countryName)}${st.region}</div>
         <p class="story">${esc(summarize(st))}</p>
         <div class="end-cause">${d.age}岁時因<b>${esc(d.cause)}</b>离开了人世。</div>
+        <div class="end-peers">
+          <div class="p-head"><span>同一秒出生的他们</span></div>
+          ${peerRows}
+        </div>
+        <p class="end-help">这个世界真实存在。如果你或你身边的人正经历艰难：${helpline}</p>
       </div>
       <div class="end-foot"><button class="btn-birth" id="btn-again">再次出生</button></div>
     </div>
@@ -297,3 +346,55 @@ const fmtMoney = (n) => {
   if (Math.abs(v) >= 10000) return (v / 10000).toFixed(1) + '万';
   return String(v);
 };
+
+// ── 同龄人陪跑面板 ──
+export function renderPeers(peers) {
+  const el = document.getElementById('peers-list');
+  if (!el) return;
+  el.innerHTML = peers.map((p, i) => {
+    const alive = p.alive;
+    const age = alive ? p.age : (p.deathInfo ? p.deathInfo.age : p.age);
+    return `<div class="peer-row ${alive ? '' : 'dead'}">
+      <span class="peer-dot"></span>
+      <span class="peer-name">${esc(p.name)}</span>
+      <span class="peer-country">${esc(p.countryName)}</span>
+      <span class="peer-age">${alive ? age + '岁' : '卒于' + age + '岁'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── 反思暂停点 ──
+const REFLECT_Q = [
+  '此刻的TA，最需要的是什么？',
+  '如果TA能许一个愿望，你觉得会是什么？',
+  'TA的世界和你的世界，哪里最不一样？',
+  '你觉得TA会怎么形容自己的童年？',
+  '走到人生的这个节点，TA最感激谁？',
+  '如果TA能对十年后的自己说一句话，会说什么？',
+];
+
+export function showReflect(st, onDone) {
+  const q = REFLECT_Q[st.rng.int(0, REFLECT_Q.length)];
+  $modal().innerHTML = `
+  <div class="overlay">
+    <div class="reflect-card">
+      <div class="rc-head"><span class="t">人生暂停 · ${st.age}岁</span><b>${st.birthYear + st.age}年 · ${esc(st.countryName)}</b></div>
+      <p class="rc-q">${q}</p>
+      <textarea id="rc-input" rows="3" placeholder="写下你的想法（也可以留空，只是想一想）……"></textarea>
+      <div class="rc-foot">
+        <button class="cc-opt" id="rc-done">继续人生</button>
+      </div>
+      <p class="rc-note">同龄人的世界在继续：TA的一秒，也是你的一秒。</p>
+    </div>
+  </div>`;
+  document.getElementById('rc-done').onclick = () => {
+    const text = document.getElementById('rc-input').value.trim();
+    if (text) {
+      const store = JSON.parse(localStorage.getItem('onein8b_reflections') || '[]');
+      store.push({ seed: st.cardNo, age: st.age, year: st.birthYear + st.age, country: st.countryName, q, text });
+      localStorage.setItem('onein8b_reflections', JSON.stringify(store.slice(-50)));
+    }
+    $modal().innerHTML = '';
+    onDone();
+  };
+}

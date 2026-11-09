@@ -151,9 +151,25 @@ export const LIFETABLES = {
   pakistan: { male: PK_MALE, female: PK_FEMALE },
 };
 
+// 生成国兜底：走 lifegen 自动生成器（按世行 e0/IMR 精确校准）
+import { genCountryTables } from './lifegen.js';
+const GEN_CACHE = new Map();
+
+function tableFor(countryId, gender) {
+  if (LIFETABLES[countryId]) return LIFETABLES[countryId][gender];
+  if (!GEN_CACHE.has(countryId)) {
+    const c = COUNTRIES_MAP[countryId];
+    if (!c || !c.leMale) throw new Error(`生命表缺项: ${countryId}`);
+    GEN_CACHE.set(countryId, genCountryTables(c.leMale, c.leFemale, c.imr));
+  }
+  return GEN_CACHE.get(countryId)[gender];
+}
+
+import { COUNTRIES as COUNTRIES_MAP } from './countries.js';
+
 // 查询某年龄的单年死亡概率；超过 115 岁必死
 export function qx(country, gender, age) {
-  const table = LIFETABLES[country][gender];
+  const table = tableFor(country, gender);
   if (age > 115) return 1;
   if (table[age] !== undefined) return table[age];
   // 缺失年龄：向下取最近的已定义年龄

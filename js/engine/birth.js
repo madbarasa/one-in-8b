@@ -2,6 +2,35 @@
 import { COUNTRIES, BIRTH_WEIGHTS } from '../data/countries.js';
 import { genName, genFamilyName } from '../data/names.js';
 
+// ── Gini 收入分布：对数正态反解 ──
+// σ = √2 · Φ⁻¹((G+1)/2)；收入 = exp(μ + σ·z)，μ 由人均 GDP 定
+function probit(p) {
+  // Beasley-Springer-Moro 近似（误差 < 1e-9）
+  const a = [0, -3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [0, -5.447609898112200e+01, 2.336849474268436e+02, -2.494832034085621e+02, 1.530243454066790e+02, -4.240093584966496e+01, 1.000000000000000e+00];
+  const c = [0, 7.984156045341246e-04, 3.523208490473923e-02, 3.032529673276067e-01, 8.317370458509600e-01, 1.534495956074812e+00, 3.316820404716731e+00];
+  const pLow = 0.02425;
+  let q, r;
+  if (p < pLow) { q = Math.sqrt(-2 * Math.log(p)); return (((((c[1]*q+c[2])*q+c[3])*q+c[4])*q+c[5])*q+c[6]) / ((((d[1]*q+d[2])*q+d[3])*q+d[4])*q+1); }
+  if (p <= 1 - pLow) { q = p - 0.5; r = q * q; return (((((a[1]*r+a[2])*r+a[3])*r+a[4])*r+a[5])*r+a[6])*q / (((((b[1]*r+b[2])*r+b[3])*r+b[4])*r+b[5])*r+1); }
+  q = Math.sqrt(-2 * Math.log(1 - p));
+  return -(((((c[1]*q+c[2])*q+c[3])*q+c[4])*q+c[5])*q+c[6]) / ((((d[1]*q+d[2])*q+d[3])*q+d[4])*q+1);
+}
+const d = [0, 1.501409405487456e+01, 8.067474305929746e+01, 1.596046287059222e+02, 8.552870603748228e+01, 1.826674975280760e+01];
+
+export function giniToSigma(g) { return Math.SQRT2 * probit(Math.min(0.999, (g + 1) / 2)); }
+
+// 五分位 → 家庭年收入（PPP 国际元）+ 美元购买力参照
+export function householdIncome(gdpPpp, gini, wealthIdx) {
+  const sigma = giniToSigma(gini || 38);
+  const mu = Math.log(gdpPpp * 0.55);       // 劳动收入份额近似
+  const quantile = (wealthIdx + 0.5) / 5;   // 五分位中点
+  const z = probit(quantile);
+  const ppp = Math.round(Math.exp(mu + sigma * z - sigma * sigma / 2));
+  const usd = Math.round(ppp / 0.42);       // PPP→美元购买力近似换算系数
+  return { ppp, usd };
+}
+
 export function rollBirth(rng, birthYear) {
   // 1. 抽国家（按全球新生儿占比）
   const ci = rng.weighted(BIRTH_WEIGHTS);
@@ -53,6 +82,8 @@ export function rollBirth(rng, birthYear) {
     stats, seed: rng, rng,
     lifeExpectancy: country.lifeExp,
     gdpPpp: country.gdpPpp,
+    group: country.group,
+    household: householdIncome(country.gdpPpp, country.gini, wealthIdx),
   };
 }
 
