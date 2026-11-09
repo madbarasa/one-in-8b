@@ -87,6 +87,12 @@ export function advanceYear(st) {
   if (choices.length > 0) {
     const ev = choices[0];
     st.firedEvents.add(ev.id);
+    // 抉择年份同样抽取 0-2 条日常事件——不再让抉择饿死人生烟火（v0.7.0 修复）
+    const nLog = st.rng.weighted([3, 4, 3]);
+    for (const ev2 of pickDistinct(logs, nLog, st.rng)) {
+      st.firedEvents.add(ev2.id);
+      applyLogEvent(st, ev2);
+    }
     return { choice: ev };
   }
 
@@ -148,6 +154,7 @@ function applyLogEvent(st, ev) {
     for (const [k, [lo, hi]] of Object.entries(ev.moneyText)) fills[k] = st.rng.int(lo, hi);
   }
   text = text.replace(/\{(\w+)\}/g, (_, k) => fills[k] ?? st[k] ?? '?');
+  st.fills = fills; // 挂到 state：事件 action 可读取随机金额/名字（s.fills.c 等）
   if (ev.applyRaise) {
     const raise = Math.round(st.income * 0.2);
     st.income += raise;

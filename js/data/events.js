@@ -24,6 +24,16 @@ import { DEEP_CN2 } from './events_cn3.js';
 import { DEEP_EXTRA3 } from './events_extra3.js';
 import { DEEP_LIFE } from './events_common4.js';
 import { DEEP_SEASON } from './events_season.js';
+import { CUL_AFRICA } from './events_cul_africa.js';
+import { CUL_AFRICA2 } from './events_cul_africa2.js';
+import { CUL_MIDEAST2 } from './events_cul_mideast2.js';
+import { CUL_ASIA2 } from './events_cul_asia2.js';
+import { CUL_FINAL } from './events_cul_final.js';
+import { CUL_SMALL } from './events_cul_small.js';
+import { CUL_MIDEAST } from './events_cul_mideast.js';
+import { CUL_ASIA } from './events_cul_asia.js';
+import { CUL_EUROPE } from './events_cul_europe.js';
+import { CUL_AMERICAS } from './events_cul_americas.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -662,6 +672,16 @@ E.push(...DEEP_CN2);
 E.push(...DEEP_EXTRA3);
 E.push(...DEEP_LIFE);
 E.push(...DEEP_SEASON);
+E.push(...CUL_AFRICA);
+E.push(...CUL_AFRICA2);
+E.push(...CUL_MIDEAST2);
+E.push(...CUL_ASIA2);
+E.push(...CUL_FINAL);
+E.push(...CUL_SMALL);
+E.push(...CUL_MIDEAST);
+E.push(...CUL_ASIA);
+E.push(...CUL_EUROPE);
+E.push(...CUL_AMERICAS);
 
 export const EVENTS = E;
 

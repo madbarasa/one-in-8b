@@ -77,12 +77,14 @@ export function rollBirth(rng, birthYear) {
 
   return {
     birthYear, country: country.id, countryName: country.name, code: country.code,
+    iso3: country.iso3,
     region: region.name, gender, wealthIdx, wealth, name, religion,
     father, mother, siblings,
     stats, seed: rng, rng,
     lifeExpectancy: country.lifeExp,
     gdpPpp: country.gdpPpp,
     group: country.group,
+    culture: country.culture,
     household: householdIncome(country.gdpPpp, country.gini, wealthIdx),
   };
 }

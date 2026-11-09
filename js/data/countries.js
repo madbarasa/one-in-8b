@@ -1,7 +1,8 @@
-// 国家库 v0.6.0：5 国手工深度配置 + 212 国从世行数据程序化展开
+// 国家库 v0.7.0：5 国手工深度配置 + 212 国从世行数据程序化展开
 // 手工国保留：宗教/死因/姓名语言/事件组/货币/父母职业等全部细节
 // 生成国：出生权重/预期寿命/IMR/Gini/城市化/GDP 来自世行 API（最新值），其余按地区组默认
 import { WORLD_STATS } from './world_stats.js';
+import { cultureOf } from './culture_groups.js';
 
 export const COUNTRIES = {
   china: {
@@ -201,15 +202,16 @@ for (const [iso3, s] of Object.entries(WORLD_STATS.countries)) {
     gini: s.gini,
     group: s.wbRegion,
     income: s.income,
+    culture: cultureOf(iso3, s.wbRegion),
   };
 }
 
-// 手工国补 group 字段（事件组触发用）
-COUNTRIES.china.group = 'EAS';
-COUNTRIES.india.group = 'SAS';
-COUNTRIES.usa.group = 'NAC';
-COUNTRIES.indonesia.group = 'EAS';
-COUNTRIES.pakistan.group = 'SAS';
+// 手工国补 group/culture 字段（事件触发用）
+COUNTRIES.china.group = 'EAS';    COUNTRIES.china.culture = 'sinic-cn';
+COUNTRIES.india.group = 'SAS';    COUNTRIES.india.culture = 'sas-indic';
+COUNTRIES.usa.group = 'NAC';      COUNTRIES.usa.culture = 'anglo-us';
+COUNTRIES.indonesia.group = 'EAS'; COUNTRIES.indonesia.culture = 'sea-maritime';
+COUNTRIES.pakistan.group = 'SAS'; COUNTRIES.pakistan.culture = 'sas-islam';
 
 // 全球出生权重数组（按 COUNTRIES 声明顺序）
 export const BIRTH_WEIGHTS = Object.values(COUNTRIES).map(c => c.birthShare);
