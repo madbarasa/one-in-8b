@@ -71,7 +71,8 @@ export function avatarSVG(country, gender, stage, size = 16, group = null) {
   const alt = pal.clothAlt;
   const isOld = stage === 'old';
   const isBaby = stage === 'baby';
-  const hair = isOld ? HAIR_OLD : HAIR;
+  const isMid = stage === 'mid';
+  const hair = isOld ? HAIR_OLD : isMid ? pal.hair : HAIR;
   const R = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
 
   if (isBaby) {
@@ -85,7 +86,8 @@ export function avatarSVG(country, gender, stage, size = 16, group = null) {
 
   // 站立人形：头 6×6 + 身 8×10 + 腿
   const h = stage === 'kid' ? 12 : stage === 'teen' ? 20 : 24;
-  const headY = 1, bodyY = headY + 7;
+  const headY = isOld ? 2 : 1;          // 老年微驼：头下沉 1px
+  const bodyY = headY + 7;
   const bodyH = stage === 'kid' ? 4 : 7;
   const legY = bodyY + bodyH;
   const legH = h - legY - 1;
@@ -98,6 +100,18 @@ export function avatarSVG(country, gender, stage, size = 16, group = null) {
   if (isFemale && stage !== 'kid') s += R(4, headY + 2, 1, 5, hair) + R(11, headY + 2, 1, 5, hair);
   // 眼睛
   s += R(6, headY + 3, 1, 1, '#2a2a2a') + R(9, headY + 3, 1, 1, '#2a2a2a');
+  // 少年圆脸：脸颊两侧补 1px 肤色
+  if (stage === 'teen') s += R(4, headY + 3, 1, 2, SKIN) + R(11, headY + 3, 1, 2, SKIN);
+  // 中年：发际线后移（额头露出 1px）+ 两鬓灰白起点
+  if (isMid) {
+    s += R(5, headY + 1, 6, 1, SKIN);
+    s += R(5, headY + 2, 1, 1, '#9a9a9a') + R(10, headY + 2, 1, 1, '#9a9a9a');
+  }
+  // 老年：皱纹 2 条 + 眉毛加浓
+  if (isOld) {
+    s += R(6, headY + 2, 4, 1, '#b09078') + R(6, headY + 4, 4, 1, '#b09078');
+    s += R(6, headY + 2, 1, 1, '#6a5a48') + R(9, headY + 2, 1, 1, '#6a5a48');
+  }
 
   // 身体：女裙 / 男袍裤（国别服饰差异在配色 + 剪裁点缀）
   if (isFemale && stage !== 'kid') {

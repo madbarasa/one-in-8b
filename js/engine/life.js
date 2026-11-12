@@ -138,6 +138,7 @@ export function resolveChoice(st, ev, option) {
   st.timeline.push({
     age: st.age, year: st.birthYear + st.age,
     text: `${outcomeText}`, source: ev.source || null, negative: totalEffect(eff) < 0,
+    net: totalEffect(eff),
   });
 }
 
@@ -162,7 +163,7 @@ function applyLogEvent(st, ev) {
   }
   if (ev.action) ev.action(st);
   applyEffect(st, ev.effect || {});
-  st.timeline.push({ age: st.age, year: st.birthYear + st.age, text, source: ev.source || null, negative: totalEffect(ev.effect || {}) < 0 });
+  st.timeline.push({ age: st.age, year: st.birthYear + st.age, text, source: ev.source || null, negative: totalEffect(ev.effect || {}) < 0, net: totalEffect(ev.effect || {}) });
 }
 
 function applyFocus(st) {

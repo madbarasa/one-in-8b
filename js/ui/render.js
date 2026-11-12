@@ -2,6 +2,7 @@
 import { COUNTRIES } from '../data/countries.js';
 import { summarize } from '../engine/life.js';
 import { avatarSVG, sceneSVG, crowdSVG, tombstoneSVG } from './pixel.js';
+import { lifeWheelSVG } from './life-wheel.js';
 
 const $app = () => document.getElementById('app');
 const $modal = () => document.getElementById('modal-root');
@@ -313,7 +314,8 @@ function stageOf(age) {
   if (age < 3) return 'baby';
   if (age < 13) return 'kid';
   if (age < 18) return 'teen';
-  if (age < 60) return 'adult';
+  if (age < 40) return 'adult';
+  if (age < 60) return 'mid';
   return 'old';
 }
 
@@ -344,6 +346,7 @@ export function renderEnd(st, onRestart, peers) {
         <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${esc(st.countryName)}${st.region}</div>
         <p class="story">${esc(summarize(st))}</p>
         <div class="end-cause">${d.age}岁時因<b>${esc(d.cause)}</b>离开了人世。</div>
+        <div class="end-wheel">${lifeWheelSVG(st)}</div>
         <button class="btn-share" id="btn-share">保存人生海报</button>
         <div class="end-peers">
           <div class="p-head"><span>同一秒出生的他们</span></div>

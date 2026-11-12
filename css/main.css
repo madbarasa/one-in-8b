@@ -212,3 +212,14 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 }
 .btn-share:hover { background: var(--accent); color: #fff; }
 .btn-share:disabled { opacity: .6; cursor: wait; }
+
+/* ── v0.9.0 生命年轮 ── */
+.life-wheel { max-width: 300px; display: block; margin: 6px auto 0; }
+.wheel-legend { margin-top: 4px; }
+.wheel-marks { text-align: left; padding: 0 26px; }
+.wheel-mark { font-size: 11.5px; color: var(--ink-2); line-height: 1.7; }
+.wheel-mark i { color: var(--accent); font-style: normal; margin-right: 6px; font-size: 9px; }
+.wheel-key { display: flex; justify-content: center; gap: 14px; font-size: 11px; color: var(--ink-3); margin-top: 8px; font-family: var(--mono); }
+.wheel-key .k-pos { color: #E8B04B; }
+.wheel-key .k-neg { color: #B3352C; }
+.wheel-key .k-base { color: var(--ink-3); }
