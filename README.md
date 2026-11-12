@@ -68,6 +68,13 @@ js/
 scripts/build_standalone.js   # 单文件打包
 ```
 
+## 项目文档
+
+- [路线图 Roadmap](docs/ROADMAP.md) —— 版本历史与待办
+- [美术提升计划](docs/ART_PLAN.md) —— P0-P3 分档
+- [数据口径说明](docs/DATA.md) —— 所有数字从哪来 + 校验脚本
+- [更新日志](CHANGELOG.md) —— v0.1.0 → v0.8.1
+
 ## Roadmap
 
 - [x] 事件库 150 → 1500+ 条（v0.5.0 → v0.7.0，含 22 文化圈本土化）
