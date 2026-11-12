@@ -136,6 +136,120 @@ export function avatarSVG(country, gender, stage, size = 16, group = null) {
   return s;
 }
 
+// ── 文化圈服饰装饰 v0.9.2：22 圈传统元素进头像（元素点缀，不做全身戏服）──
+// 每圈 male/female 装饰函数：入参 ctx = { R, headY, bodyY, bodyH, pal, cloth, alt, kid }
+// 像素约定：头部 6px 宽位于 (5, headY)；身体 8px 宽位于 (4, bodyY)
+const ATTIRE = {
+  // ── 亚太 ──
+  sinic: {
+    male: c => c.R(5, c.bodyY, 6, 1, c.alt) + c.R(7, c.bodyY + 1, 2, 1, c.alt),                 // 立领 + 斜襟
+    female: c => c.R(5, c.bodyY, 6, 1, c.alt) + c.R(7, c.bodyY + 1, 1, 1, '#e8e4d8') + c.R(8, c.bodyY + 2, 1, 1, '#e8e4d8') + c.R(3, c.headY - 1, 2, 2, c.pal.hair),  // 盘扣点 + 发髻
+  },
+  'sea-mainland': {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, c.alt),                                                // 围巾横带
+    female: c => c.R(4, c.bodyY + 3, 8, 1, c.pal.accent) + c.R(4, c.bodyY + 5, 8, 1, c.alt) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),  // 筒裙双纹 + 发髻
+  },
+  'sea-maritime': {
+    male: c => c.R(4, c.bodyY + 2, 8, 2, c.pal.accent) + c.R(5, c.bodyY + 2, 1, 1, c.cloth) + c.R(7, c.bodyY + 3, 1, 1, c.cloth) + c.R(9, c.bodyY + 2, 1, 1, c.cloth),  // 纱笼格纹
+    female: c => c.R(5, c.headY - 1, 6, 1, '#3a3a4a') + c.R(4, c.headY + 1, 1, 3, '#3a3a4a') + c.R(11, c.headY + 1, 1, 3, '#3a3a4a') + c.R(4, c.bodyY + 4, 8, 1, c.pal.accent),  // 头巾包顶垂侧 + 裙纹
+  },
+  'sas-indic': {
+    male: c => c.R(4, c.bodyY, 8, 1, c.alt) + c.R(10, c.bodyY + 1, 2, 1, c.alt),                // 斜披肩线
+    female: c => c.R(4, c.bodyY, 8, 2, c.pal.accent) + c.R(6, c.bodyY, 1, 2, c.cloth) + c.R(7, c.headY + 5, 1, 1, '#c03028') + c.R(3, c.headY - 1, 2, 2, c.pal.hair),  // 纱丽披肩斜色 + 额点 + 发髻
+  },
+  'sas-islam': {
+    male: c => c.R(5, c.headY - 1, 6, 1, '#f4f0e4') + c.R(5, c.headY - 1, 6, 1, '#f4f0e4') + c.R(4, c.bodyY, 8, 1, '#e8e4d8'),   // 礼拜帽 + 白袍领
+    female: c => c.R(5, c.headY - 1, 6, 2, '#4a4060') + c.R(4, c.headY + 1, 1, 4, '#4a4060') + c.R(11, c.headY + 1, 1, 4, '#4a4060'),  // 头巾包顶垂肩
+  },
+  // ── 非洲 ──
+  'west-africa': {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, c.pal.accent) + c.R(5, c.bodyY + 3, 2, 1, c.alt) + c.R(8, c.bodyY + 3, 2, 1, c.alt),   // 蜡染波点
+    female: c => c.R(5, c.headY - 1, 6, 2, c.pal.accent) + c.R(4, c.headY, 1, 1, '#e8b04b') + c.R(11, c.headY, 1, 1, '#e8b04b') + c.R(4, c.bodyY + 2, 8, 1, c.pal.accent) + c.R(5, c.bodyY + 3, 2, 1, c.cloth) + c.R(8, c.bodyY + 3, 2, 1, c.cloth),  // 头巾包布 + 金耳环 + 波点裙
+  },
+  horn: {
+    male: c => c.R(6, c.bodyY + 1, 1, c.bodyH, '#e8e4d8') + c.R(8, c.bodyY + 1, 1, c.bodyH, '#e8e4d8'),   // 白袍竖线
+    female: c => c.R(4, c.bodyY + 1, 8, 1, '#c03028') + c.R(4, c.bodyY + 3, 8, 1, '#e8b04b') + c.R(4, c.bodyY + 5, 8, 1, '#2a6848'),   // 三色横带
+  },
+  'central-africa': {
+    male: c => c.R(5, c.bodyY + 2, 1, 1, c.alt) + c.R(10, c.bodyY + 2, 1, 1, c.alt) + c.R(7, c.bodyY + 4, 1, 1, c.alt) + c.R(8, c.bodyY + 4, 1, 1, c.alt),   // 菱形点阵
+    female: c => c.R(5, c.bodyY + 2, 2, 1, c.pal.accent) + c.R(9, c.bodyY + 3, 2, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),
+  },
+  'east-africa': {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, '#c03028') + c.R(4, c.bodyY + 3, 8, 1, '#f4f0e4') + c.R(4, c.bodyY + 4, 8, 1, '#2a2a2a') + c.R(6, c.bodyY, 4, 1, '#c03028'),   // 马赛毯三色 + 珠领
+    female: c => c.R(6, c.bodyY, 4, 1, '#c03028') + c.R(6, c.bodyY + 1, 4, 1, '#f4f0e4') + c.R(4, c.bodyY + 4, 8, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 珠项链双层 + 裙纹
+  },
+  'southern-africa': {
+    male: c => c.R(4, c.bodyY + 1, 8, 1, c.pal.accent) + c.R(4, c.bodyY + 4, 8, 1, c.alt),      // 宽横带
+    female: c => c.R(4, c.bodyY + 3, 8, 2, c.pal.accent) + c.R(5, c.bodyY + 3, 1, 1, '#f4f0e4') + c.R(7, c.bodyY + 3, 1, 1, '#f4f0e4') + c.R(9, c.bodyY + 3, 1, 1, '#f4f0e4') + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 珠裙点阵
+  },
+  // ── 中东 ──
+  maghreb: {
+    male: c => c.R(5, c.bodyY + 2, 2, 1, c.alt) + c.R(7, c.bodyY + 3, 2, 1, c.alt) + c.R(9, c.bodyY + 2, 2, 1, c.alt) + c.R(5, c.headY - 1, 6, 1, c.alt),   // 柏柏尔菱纹 + 圆帽
+    female: c => c.R(5, c.headY - 1, 6, 2, c.alt) + c.R(4, c.headY + 1, 1, 4, c.alt) + c.R(11, c.headY + 1, 1, 4, c.alt) + c.R(4, c.bodyY + 2, 8, 1, c.pal.accent),   // 头巾 + 裙纹
+  },
+  'arab-core': {
+    male: c => c.R(4, c.bodyY, 8, c.bodyH, '#f4f0e4') + c.R(5, c.headY + 1, 6, 1, '#2a2a2a') + c.R(6, c.headY + 4, 1, 1, '#3a2a1a') + c.R(9, c.headY + 4, 1, 1, '#3a2a1a'),   // 白袍 + 黑头箍绳 + 络腮胡点
+    female: c => c.R(5, c.headY - 1, 6, 2, '#3a3a4a') + c.R(4, c.headY + 1, 1, 5, '#3a3a4a') + c.R(11, c.headY + 1, 1, 5, '#3a3a4a') + c.R(4, c.bodyY, 8, c.bodyH, '#4a4a5a'),   // 头巾全包 + 长袍
+  },
+  persia: {
+    male: c => c.R(7, c.bodyY, 1, c.bodyH, c.alt) + c.R(7, c.bodyY + 2, 1, 1, '#e8b04b'),       // 长袍扣线 + 金扣
+    female: c => c.R(5, c.bodyY + 2, 1, 1, c.pal.accent) + c.R(10, c.bodyY + 3, 1, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair) + c.R(11, c.headY - 1, 2, 2, c.pal.hair),   // 双花点缀 + 双侧发
+  },
+  'turkic-caucasus': {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, c.pal.accent) + c.R(5, c.bodyY + 2, 1, 1, c.alt) + c.R(7, c.bodyY + 2, 1, 1, c.alt) + c.R(9, c.bodyY + 2, 1, 1, c.alt),   // 刺绣横带花点
+    female: c => c.R(5, c.headY - 1, 6, 2, c.pal.accent) + c.R(4, c.bodyY + 3, 8, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 花头巾 + 裙带
+  },
+  // ── 欧洲 ──
+  balkan: {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, '#2a2a2a') + c.R(4, c.bodyY + 3, 8, 1, c.pal.accent),  // 双色腰带（巴尔干传统腰饰）
+    female: c => c.R(3, c.headY - 1, 2, 2, '#e8e4d8') + c.R(11, c.headY - 1, 2, 2, '#e8e4d8') + c.R(4, c.bodyY + 2, 8, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, '#f4f0e4'),   // 白头巾 + 腰带
+  },
+  'east-euro': {
+    male: c => c.R(4, c.bodyY + 2, 8, 1, c.alt) + c.R(7, c.bodyY + 1, 1, 1, '#e8b04b'),         // 毛衣横纹 + 金扣
+    female: c => c.R(5, c.headY - 1, 6, 1, '#c8404a') + c.R(4, c.headY + 1, 1, 4, '#c8404a') + c.R(11, c.headY + 1, 1, 4, '#c8404a') + c.R(7, c.bodyY + 2, 2, 1, '#e8b04b'),   // 红头巾（babushka）+ 胸花
+  },
+  'west-north-euro': {
+    male: c => c.R(4, c.bodyY, 8, 1, c.alt) + c.R(6, c.bodyY + 2, 1, 1, c.alt) + c.R(8, c.bodyY + 2, 1, 1, c.alt),   // 北欧毛衣 V 领纹
+    female: c => c.R(4, c.headY + 2, 1, 6, c.pal.hair) + c.R(11, c.headY + 2, 1, 6, c.pal.hair) + c.R(4, c.headY + 7, 1, 1, c.pal.hair) + c.R(11, c.headY + 7, 1, 1, c.pal.hair),   // 麻花长辫垂腰
+  },
+  // ── 美洲 ──
+  'hispanic-latam': {
+    male: c => c.R(3, c.headY - 1, 10, 1, c.pal.roof || '#8a6838') + c.R(5, c.headY - 2, 6, 1, c.pal.roof || '#8a6838') + c.R(4, c.bodyY + 3, 8, 1, c.alt),   // 宽檐帽 + poncho 横带
+    female: c => c.R(5, c.bodyY + 4, 1, 1, c.pal.accent) + c.R(8, c.bodyY + 4, 1, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair) + c.R(11, c.headY - 1, 2, 2, c.pal.hair),   // 裙摆花点 + 双辫
+  },
+  'brazil-luso': {
+    male: c => c.R(4, c.bodyY, 8, 1, '#e8b04b') + c.R(4, c.bodyY + 4, 8, 1, '#2a6848'),         // 亮色横带（狂欢节衬衫）
+    female: c => c.R(5, c.bodyY + 2, 1, 1, '#e8b04b') + c.R(7, c.bodyY + 3, 1, 1, '#c03028') + c.R(9, c.bodyY + 2, 1, 1, '#2a6848') + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 亮片点阵
+  },
+  caribbean: {
+    male: c => c.R(4, c.bodyY + 1, 8, 1, '#c03028') + c.R(4, c.bodyY + 2, 8, 1, '#e8b04b') + c.R(4, c.bodyY + 3, 8, 1, '#2a6848'),   // 三色横条
+    female: c => c.R(4, c.headY, 1, 1, '#e878a0') + c.R(11, c.headY, 1, 1, '#e878a0') + c.R(4, c.bodyY + 4, 8, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 耳边双花 + 裙纹
+  },
+  anglo: {
+    male: c => c.R(5, c.bodyY + 1, 2, 1, '#d8d8e0') + c.R(8, c.bodyY + 1, 2, 1, '#d8d8e0') + c.R(6, c.bodyY + 3, 2, 1, '#d8d8e0') + c.R(9, c.bodyY + 3, 2, 1, '#d8d8e0'),   // 格子衬衫淡格
+    female: null,                                                                              // 现代装不加装饰
+  },
+  // ── 大洋洲 ──
+  oceania: {
+    male: c => c.R(4, c.bodyY + 3, 8, 1, c.pal.accent) + c.R(4, c.bodyY + 5, 8, 1, c.pal.accent),   // 草裙细纹
+    female: c => c.R(4, c.headY, 1, 1, '#e878a0') + c.R(4, c.bodyY + 4, 8, 1, c.pal.accent) + c.R(3, c.headY - 1, 2, 2, c.pal.hair),   // 耳边花 + 裙纹 + 发
+  },
+};
+
+// 按圈+性别绘制服饰装饰（儿童只画头部元素，保童装简洁）
+function attireDeco(culture, gender, stage, ctx) {
+  const cult = ATTIRE[culture];
+  if (!cult) return '';
+  const fn = gender === 'female' ? cult.female : cult.male;
+  if (!fn) return '';
+  if (stage === 'kid') {
+    // 儿童：只保留头部相关元素（头巾/帽/发饰），跳过衣身纹样
+    const headOnly = fn(ctx).match(/headY[^)]*\)/g) || [];
+    return headOnly.join('');
+  }
+  return fn(ctx);
+}
+
 // ── 场景生成器 ──
 // 维度：国家 × 城乡 × 人生阶段（天色） × 家庭在场（配偶/子女）
 export function sceneSVG(st) {

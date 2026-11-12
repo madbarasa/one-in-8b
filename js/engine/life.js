@@ -25,6 +25,7 @@ export function createLifeState(birth) {
     childcareDone: false,
     focus: null,        // 年度重心：study/social/family/sport/hobby
     firedEvents: new Set(),
+    eventCooldown: {},  // once:false 事件的冷却截止年龄（v0.9.2）
     timeline: [],       // [{age, year, text, source, negative}]
     interests: [],      // [{name, lv}]
     pendingChoices: [], // 本年待处理的抉择
@@ -83,14 +84,17 @@ export function advanceYear(st) {
   const choices = pool.filter(e => e.type === 'choice');
   const logs = pool.filter(e => e.type === 'log');
 
-  // 抉择事件：同一年只触发一个（权重取第一个命中的固定年龄事件）
+  // 抉择事件：同一年只触发一个——按 weight 随机抽取（v0.9.2 修复：原 choices[0] 永取数组第一条，
+  // 导致 once:false 且无 cond 的事件（彩票摊）18-70 岁年年必中）
   if (choices.length > 0) {
-    const ev = choices[0];
+    const ev = choices.length === 1 ? choices[0] : choices[st.rng.weighted(choices.map(c => c.weight || 1))];
     st.firedEvents.add(ev.id);
+    markCooldown(st, ev);
     // 抉择年份同样抽取 0-2 条日常事件——不再让抉择饿死人生烟火（v0.7.0 修复）
     const nLog = st.rng.weighted([3, 4, 3]);
     for (const ev2 of pickDistinct(logs, nLog, st.rng)) {
       st.firedEvents.add(ev2.id);
+      markCooldown(st, ev2);
       applyLogEvent(st, ev2);
     }
     return { choice: ev };
@@ -101,6 +105,7 @@ export function advanceYear(st) {
   const picked = pickDistinct(logs, n, st.rng);
   for (const ev of picked) {
     st.firedEvents.add(ev.id);
+    markCooldown(st, ev);
     applyLogEvent(st, ev);
   }
 
@@ -109,6 +114,12 @@ export function advanceYear(st) {
   st.stats.hap = clamp(st.stats.hap + (st.rng.chance(0.3) ? 1 : -1));
 
   return { died: false };
+}
+
+// 可重复事件（once:false）冷却：默认 8 年内不重触发（v0.9.2 新增，防常规事件连年重复）
+const DEFAULT_COOLDOWN = 8;
+function markCooldown(st, ev) {
+  if (ev.once === false) st.eventCooldown[ev.id] = st.age + (ev.cooldown || DEFAULT_COOLDOWN);
 }
 
 // 抉择选择完成后的效果结算

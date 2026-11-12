@@ -694,6 +694,8 @@ export function filterEvents(events, state) {
     if (ev.minAge !== undefined && state.age < ev.minAge) return false;
     if (ev.maxAge !== undefined && state.age > ev.maxAge) return false;
     if (ev.once !== false && state.firedEvents.has(ev.id)) return false;
+    // 可重复事件冷却期内不再出现（v0.9.2）
+    if (state.eventCooldown && state.eventCooldown[ev.id] > state.age) return false;
     if (ev.stage && !stageMatch(ev.stage, state.age)) return false;
     if (ev.cond && !ev.cond(state)) return false;
     // 教室模式：沉重主题事件大幅降权（保留存在感但几乎不触发）
