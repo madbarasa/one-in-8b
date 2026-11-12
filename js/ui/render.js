@@ -344,6 +344,7 @@ export function renderEnd(st, onRestart, peers) {
         <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${esc(st.countryName)}${st.region}</div>
         <p class="story">${esc(summarize(st))}</p>
         <div class="end-cause">${d.age}岁時因<b>${esc(d.cause)}</b>离开了人世。</div>
+        <button class="btn-share" id="btn-share">保存人生海报</button>
         <div class="end-peers">
           <div class="p-head"><span>同一秒出生的他们</span></div>
           ${peerRows}
@@ -354,6 +355,20 @@ export function renderEnd(st, onRestart, peers) {
     </div>
   </div>`;
   document.getElementById('btn-again').onclick = onRestart;
+  document.getElementById('btn-share').onclick = async e => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = '正在绘制…';
+    try {
+      const { downloadShareCard } = await import('./share-card.js');
+      await downloadShareCard(st);
+      btn.textContent = '已保存 ✓';
+    } catch (err) {
+      btn.textContent = '生成失败';
+      throw err;
+    }
+    setTimeout(() => { btn.disabled = false; btn.textContent = '保存人生海报'; }, 2500);
+  };
 }
 
 function bindGameControls(handlers) {

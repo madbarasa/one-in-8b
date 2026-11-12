@@ -3,6 +3,7 @@ import { makeRng, randomSeed } from './rng.js';
 import { rollBirth, birthCardNo } from './engine/birth.js';
 import { createLifeState, advanceYear, resolveChoice } from './engine/life.js';
 import { renderHome, renderBirthCard, renderGameShell, renderEnd, updateGame, showChoice, renderFocus, showReflect, renderPeers } from './ui/render.js';
+import { applyEraTheme, resetEraTheme } from './ui/era-themes.js';
 
 let st = null;
 let peers = [];      // 同龄人陪跑（同秒出生的另外 4 个婴儿）
@@ -14,6 +15,7 @@ const REFLECT_AGES = [5, 15, 30, 50, 70];
 // ── 首页 ──
 function goHome() {
   stopLoop();
+  resetEraTheme();
   renderHome((year) => goBirthCard(year));
 }
 
@@ -21,6 +23,7 @@ function goHome() {
 function goBirthCard(year) {
   const rng = makeRng(randomSeed());
   const birthYear = year || new Date().getFullYear();
+  applyEraTheme(birthYear);
   const birth = rollBirth(rng, birthYear);
   st = createLifeState(birth);
   const no = birthCardNo(rng, st.code, birthYear);
