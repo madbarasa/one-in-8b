@@ -250,3 +250,10 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
   animation: inkVeil 1.4s ease-in forwards;
 }
 .screen-end { animation: cardIn .5s ease-out; }
+
+/* ── v0.9.4 时代印记 ── */
+.era-band { margin: 10px 26px 0; padding: 10px 0 4px; border-top: 1px solid var(--line, #e0d8c8); }
+.era-head { font-size: 12px; color: var(--ink-2, #5a6068); text-align: center; margin-bottom: 8px; letter-spacing: 1px; }
+.era-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.era-chip { font-size: 11px; color: var(--ink-2, #5a6068); background: rgba(232,176,75,.14); border: 1px solid rgba(232,176,75,.4); border-radius: 10px; padding: 2px 9px 2px 4px; line-height: 1.6; }
+.era-chip b { display: inline-block; background: #E8B04B; color: #fff; border-radius: 8px; font-size: 10px; padding: 0 6px; margin-right: 5px; font-family: var(--mono, monospace); }

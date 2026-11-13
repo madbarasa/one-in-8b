@@ -1,6 +1,7 @@
 // 生命年轮 v0.9.0：结算页同心圆可视化
 // 中心=出生，向外一圈十年；每年一段弧，金色好年/朱红坏年/淡墨空白年
-// 重大事件（里程碑/婚姻/丧偶/迁移）在环上打点，图例在下方
+// 重大事件（里程碑/婚姻/丧偶/迁移）在环上打点，时代事件打金点（v0.9.4），图例在下方
+import { ERA_TITLES, eraShortTitle } from '../data/events_era.js';
 
 const C = { pos: '#E8B04B', neg: '#B3352C', base: '#d8d0bd', mark: '#1D4E5F', text: '#5a6068' };
 
@@ -37,7 +38,7 @@ export function lifeWheelSVG(st) {
     if (!cur.t || (cur.t.weight || 0) < (t.weight || 0)) cur.t = t;
     byAge.set(t.age, cur);
   }
-  // 重大事件标记：里程碑/婚姻/生育/丧偶/迁移（优先取一条）
+  // 重大事件标记：里程碑/婚姻/生育/丧偶/迁移（优先取一条）+ 时代事件（era- 前缀，金色）
   const marks = [];
   for (const t of st.timeline) {
     const big = t.milestone || /婚姻|结婚|孩子|丧|离世|移民|搬|战争|灾害/.test(t.text || '');
@@ -45,6 +46,15 @@ export function lifeWheelSVG(st) {
   }
   const seen = new Set();
   const uniqMarks = marks.filter(t => { const k = t.age + '/' + (t.text || '').slice(0, 6); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
+  // 时代印记点（v0.9.4）：era- 事件在年轮上打金点，tooltip 显示标题
+  const eraMarks = [];
+  const seenEra = new Set();
+  for (const t of st.timeline) {
+    if (t.id && t.id.startsWith('era-') && !seenEra.has(t.id)) {
+      seenEra.add(t.id);
+      eraMarks.push({ age: t.age, title: (ERA_TITLES && ERA_TITLES[t.id]) || eraShortTitle(t.text) });
+    }
+  }
 
   let s = `<svg viewBox="0 0 ${size} ${size}" width="100%" class="life-wheel">`;
   // 十年刻度细环
@@ -70,6 +80,14 @@ export function lifeWheelSVG(st) {
     const deg = (t.age % 10) * 36 + 18;
     const [mx, my] = polar(cx, cy, r, deg);
     s += `<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="3.5" fill="#fff" stroke="${C.mark}" stroke-width="1.6"/>`;
+  }
+  // 时代印记金点（v0.9.4）：外圈偏移 3 度避免与重大事件点重叠，hover 出标题
+  for (const m of eraMarks) {
+    const ring = Math.floor(m.age / 10);
+    const r = rMin + ring * rStep;
+    const deg = (m.age % 10) * 36 + 21;
+    const [ex2, ey2] = polar(cx, cy, r, deg);
+    s += `<circle cx="${ex2.toFixed(1)}" cy="${ey2.toFixed(1)}" r="2.8" fill="${C.pos}" stroke="#fff" stroke-width="0.8"><title>${esc(m.title)} · ${m.age} 岁</title></circle>`;
   }
   // 中心：年份起点
   s += `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="11" fill="${C.text}" font-family="monospace">0岁</text>`;

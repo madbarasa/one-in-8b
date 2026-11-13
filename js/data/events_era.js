@@ -671,4 +671,52 @@ AC({
   cond: s => s.iso3 === 'BRA' && Y(1994, 1994)(s),
 });
 
+// ══════════ 时代里程碑短标题映射 ══════════
+// 结算页「时代印记」/ 年轮标记 / 分享卡：id → 一行标题（你经历了什么）
+export const ERA_TITLES = {
+  // 太空与科学
+  'era-sputnik': '斯普特尼克上天', 'era-gagarin': '加加林进入太空', 'era-apollo': '人类登上月球',
+  'era-genome-map': '人类基因组测序完成', 'era-iss-live': '国际空间站有人常驻', 'era-mrna': 'mRNA 疫苗时代',
+  'era-ivf': '第一个试管婴儿出生', 'era-antiretro': '鸡尾酒疗法问世',
+  // 战争与和平
+  'era-us-911': '911 事件', 'era-us-911-enlist': '911 后的征兵抉择', 'era-ussr-fall': '苏联解体',
+  'era-berlin-wall-log': '柏林墙倒塌', 'era-ch-berlin-wall': '柏林墙下的抉择', 'era-ch-wall-escape': '翻越柏林墙',
+  'era-us-vietnam': '越战征兵抉择', 'era-us-civil-rights': '民权法案时代', 'era-us-march': '塞尔玛游行',
+  'era-in-1971-refugees': '孟加拉战争难民潮', 'era-pk-bangladesh': '孟加拉独立', 'era-hn-eritrea-split': '厄立特里亚分治',
+  'era-africa-year': '非洲独立年', 'era-wa-independence-officer': '独立年归国抉择', 'era-za-first-vote': '南非首次大选投票',
+  'era-ru-chernobyl': '切尔诺贝利清理者', 'era-hn-berbera-trade': '战火中的商路',
+  // 经济时代
+  'era-ch-reform': '改革开放', 'era-ch-xiahai': '下海抉择', 'era-ch-shenzhen': '南下深圳', 'era-ch-wto-job': '入世与外企',
+  'era-cn-reform': '改革开放岁月', 'era-cn-gaokao77': '恢复高考', 'era-cn-hk': '香港回归', 'era-cn-olympics': '北京奥运',
+  'era-cn-twochild': '全面二孩', 'era-ch-gaokao-choice': '1977 高考抉择', 'era-ch-twochild-choice': '二孩抉择',
+  'era-in-liberal': '印度经济自由化', 'era-in-startup': '印度 IT 创业抉择', 'era-in-emergency': '印度紧急状态',
+  'era-us-watergate': '水门事件', 'era-us-87-crash': '黑色星期一', 'era-us-2008-house': '次贷后的法拍房',
+  'era-latin-debt': '拉美失去的十年', 'era-la-migrate-north': '北上沙漠抉择', 'era-br-real-plan': '雷亚尔计划',
+  'era-jp-bubble': '日本泡沫顶端的房子', 'era-jp-endaka': '广场协议', 'era-th-baht-97': '泰铢腰斩',
+  'era-ru-voucher': '私有化券抉择', 'era-kr-imf': 'IMF 外汇危机', 'era-hsr-era': '高铁时代',
+  'era-container': '集装箱革命', 'era-747': '波音 747 与廉价机票', 'era-supermarket': '自选超市到来',
+  'era-green-revolution': '绿色革命', 'era-mobile-phone': '手机普及', 'era-mobile-pay': '移动支付时代',
+  'era-in-demonetization': '印度废钞令', 'era-bd-flood-98': '98 大洪水重建',
+  // 政治与社会
+  'era-jp-tokyo64': '东京奥运与新干线', 'era-kr-democracy': '六月民主运动', 'era-ph-edsa': 'EDSA 人民力量革命',
+  'era-sg-1965': '新加坡建国', 'era-vn-doi-moi': '越南革新开放', 'era-mn-coop-end': '合作社解散',
+  'era-ar-kuwait-exodus': '海湾战争撤离', 'era-ar-spring-square': '阿拉伯之春', 'era-pe-1979-exile': '1979 伊朗革命去留',
+  'era-tk-gastarbeiter': '赴德劳工列车', 'era-can-referendum': '魁北克公投', 'era-eu-erasmus': '伊拉斯谟学期',
+  'era-eu-east-expands': '欧盟东扩', 'era-eu-erasmus-choice': '伊拉斯谟抉择', 'era-id-reform': '印尼改革',
+  'era-au-vietnamese-boats': '达尔文港的船民', 'era-climate-talk': '气候谈判年代', 'era-ev-wave': '电动车浪潮',
+  // 灾难与韧
+  'era-jp-311': '311 东日本大地震', 'era-id-tsunami': '印度洋海啸', 'era-np-quake': '尼泊尔地震',
+  'era-covid': '全球疫情三年', 'era-ozone': '臭氧层修复协议', 'era-noise-map': '城市降噪年代',
+  // 日常生活革命
+  'era-worldcup-tv': '世界杯年代', 'era-social-media': '社交网络时代', 'era-first-smartphone': '第一部智能手机',
+  'era-penicillin': '抗生素时代', 'era-polio-vaccine': '糖丸与疫苗', 'era-online-era': '互联网接入',
+};
+// 兜底：从文案里截短（结算页对无映射的 era 事件取 text 前 18 字）
+export const eraShortTitle = (t) => {
+  if (!t) return '';
+  const s = String(t);
+  const cut = s.split(/[。：:——]/)[0];
+  return cut.length > 20 ? cut.slice(0, 19) + '…' : cut;
+};
+
 

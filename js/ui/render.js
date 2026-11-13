@@ -4,6 +4,21 @@ import { summarize } from '../engine/life.js';
 import { avatarSVG, sceneSVG, crowdSVG, tombstoneSVG } from './pixel.js';
 import { lifeWheelSVG } from './life-wheel.js';
 import { cultureOfIso } from '../data/culture_groups.js';
+import { ERA_TITLES, eraShortTitle } from '../data/events_era.js';
+
+// 时代印记区：结算页列出你一生穿越的大时代（v0.9.4）
+function eraBandHtml(st) {
+  const marks = st.timeline.filter(t => t.id && t.id.startsWith('era-'));
+  if (!marks.length) return '';
+  const chips = marks.map(t => {
+    const title = ERA_TITLES[t.id] || eraShortTitle(t.text);
+    return `<span class="era-chip"><b>${t.age}</b>${esc(title)}</span>`;
+  }).join('');
+  return `<div class="era-band">
+    <div class="era-head">⏳ 你的一生穿越了 ${marks.length} 个时代印记</div>
+    <div class="era-chips">${chips}</div>
+  </div>`;
+}
 
 const $app = () => document.getElementById('app');
 const $modal = () => document.getElementById('modal-root');
@@ -347,6 +362,7 @@ export function renderEnd(st, onRestart, peers) {
         <div class="span">${st.birthYear} – ${d.year} · 享年${d.age}岁 · ${esc(st.countryName)}${st.region}</div>
         <p class="story">${esc(summarize(st))}</p>
         <div class="end-cause">${d.age}岁時因<b>${esc(d.cause)}</b>离开了人世。</div>
+        ${eraBandHtml(st)}
         <div class="end-wheel">${lifeWheelSVG(st)}</div>
         <button class="btn-share" id="btn-share">保存人生海报</button>
         <div class="end-peers">
