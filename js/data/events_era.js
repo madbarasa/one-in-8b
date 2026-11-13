@@ -710,6 +710,15 @@ export const ERA_TITLES = {
   // 日常生活革命
   'era-worldcup-tv': '世界杯年代', 'era-social-media': '社交网络时代', 'era-first-smartphone': '第一部智能手机',
   'era-penicillin': '抗生素时代', 'era-polio-vaccine': '糖丸与疫苗', 'era-online-era': '互联网接入',
+  // era2 / 主文件补充（第二批覆盖遗漏）
+  'era-phone': '第一部手机', 'era-first-email': '第一封电子邮件', 'era-ev-bike': '电动车普及',
+  'era-blackhole': '首张黑洞照片', 'era-online-shop': '网购时代', 'era-internet': '互联网接入',
+  'era-cashless': '无现金时代', 'era-social-video': '短视频时代', 'era-esports': '电子竞技元年',
+  'era-5g': '5G 时代', 'era-share-bike': '共享单车浪潮', 'era-streaming': '流媒体取代电视',
+  // 历史抉择第二批
+  'era-jp-shinkansen': '新干线工地', 'era-jp-fukushima-farm': '福岛疏散线', 'era-oc-climate-move': '气候搬迁抉择',
+  'era-kr-democracy': '六月民主运动', 'era-sg-1965': '新加坡建国', 'era-vn-doi-moi': '越南革新开放',
+  'era-gaokao77': '恢复高考', 'era-ch-reform-choice': '改革抉择',
 };
 // 兜底：从文案里截短（结算页对无映射的 era 事件取 text 前 18 字）
 export const eraShortTitle = (t) => {
