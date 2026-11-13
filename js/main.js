@@ -196,6 +196,12 @@ function autoPickFocus() {
 function onDeath() {
   stopLoop();
   updateGame(st);
+  // 墨色晕开过场（v0.9.3）：1.4s 动画结束后移除 veil
+  const veil = document.createElement('div');
+  veil.className = 'ink-veil';
+  document.body.appendChild(veil);
+  veil.addEventListener('animationend', () => veil.remove());
+  setTimeout(() => veil.remove(), 2000);
   renderEnd(st, () => goHome(), peers);
 }
 

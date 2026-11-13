@@ -34,6 +34,10 @@ import { CUL_MIDEAST } from './events_cul_mideast.js';
 import { CUL_ASIA } from './events_cul_asia.js';
 import { CUL_EUROPE } from './events_cul_europe.js';
 import { CUL_AMERICAS } from './events_cul_americas.js';
+import { ERA_EVENTS } from './events_era.js';
+import { PHASE_EVENTS } from './events_phase.js';
+import { CUL_MORE_A } from './events_cul_more_a.js';
+import { CUL_MORE_B } from './events_cul_more_b.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -672,7 +676,7 @@ E.push(...DEEP_CN2);
 E.push(...DEEP_EXTRA3);
 E.push(...DEEP_LIFE);
 E.push(...DEEP_SEASON);
-E.push(...CUL_AFRICA);
+E.push(...WORLD_EVENTS);
 E.push(...CUL_AFRICA2);
 E.push(...CUL_MIDEAST2);
 E.push(...CUL_ASIA2);
@@ -682,8 +686,19 @@ E.push(...CUL_MIDEAST);
 E.push(...CUL_ASIA);
 E.push(...CUL_EUROPE);
 E.push(...CUL_AMERICAS);
+E.push(...ERA_EVENTS);
+E.push(...PHASE_EVENTS);
+E.push(...CUL_MORE_A);
+E.push(...CUL_MORE_B);
 
-export const EVENTS = E;
+// id 去重：保留先注册的（v0.7 优先），后注册的同 id 丢弃（v0.9.3）
+const seenIds = new Set();
+const dedupedEvents = E.filter(ev => {
+  if (seenIds.has(ev.id)) return false;
+  seenIds.add(ev.id);
+  return true;
+});
+export const EVENTS = dedupedEvents;
 
 // 按年龄过滤 + 条件过滤 + once 过滤
 const classroomOn = () => (typeof localStorage !== 'undefined') && localStorage.getItem('onein8b_classroom') === '1';

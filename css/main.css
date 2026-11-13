@@ -223,3 +223,30 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .wheel-key .k-pos { color: #E8B04B; }
 .wheel-key .k-neg { color: #B3352C; }
 .wheel-key .k-base { color: var(--ink-3); }
+
+/* ── v0.9.3 事件卡动效 ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(.93) translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes inkVeil {
+  0% { opacity: 0; }
+  35% { opacity: .92; }
+  100% { opacity: 0; }
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.choice-card { animation: cardIn .3s cubic-bezier(.2,.8,.3,1); }
+.choice-card .cc-opt { animation: fadeSlide .25s ease-out backwards; }
+.choice-card .cc-opt:nth-child(1) { animation-delay: .08s; }
+.choice-card .cc-opt:nth-child(2) { animation-delay: .16s; }
+.choice-card .cc-opt:nth-child(3) { animation-delay: .24s; }
+.choice-card .cc-opt:nth-child(4) { animation-delay: .32s; }
+.ink-veil {
+  position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  background: radial-gradient(ellipse at center, rgba(20,24,28,.9) 0%, rgba(20,24,28,.65) 55%, rgba(20,24,28,0) 85%);
+  animation: inkVeil 1.4s ease-in forwards;
+}
+.screen-end { animation: cardIn .5s ease-out; }
