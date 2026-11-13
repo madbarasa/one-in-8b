@@ -125,7 +125,12 @@ function markCooldown(st, ev) {
 // 抉择选择完成后的效果结算
 export function resolveChoice(st, ev, option) {
   st.pendingChoices = st.pendingChoices.filter(e => e !== ev);
-  const eff = option.effect || {};
+  // outcome 函数可返回 { text, effect } 对象——分支结局带差异化数值（v0.9.3 历史抉择用）
+  let eff = option.effect || {};
+  const outcomeRaw = typeof option.outcome === 'function' ? option.outcome(st) : option.outcome;
+  if (outcomeRaw && typeof outcomeRaw === 'object') {
+    eff = outcomeRaw.effect || eff;
+  }
   applyEffect(st, eff);
   if (option.setSchool !== undefined) {
     st.inSchool = option.setSchool;
@@ -144,8 +149,8 @@ export function resolveChoice(st, ev, option) {
   if (option.raiseIncome) st.income = Math.round(st.income * (1 + option.raiseIncome));
   if (option.action) option.action(st);
 
-  // 记录时间线（outcome 支持动态函数：函数内可自行结算钱与状态）
-  const outcomeText = typeof option.outcome === 'function' ? option.outcome(st) : option.outcome;
+  // 记录时间线（outcomeRaw 复用头部结果——函数 outcome 只执行一次，随机分支与数值同步）
+  const outcomeText = (outcomeRaw && typeof outcomeRaw === 'object') ? outcomeRaw.text : outcomeRaw;
   st.timeline.push({
     age: st.age, year: st.birthYear + st.age,
     text: `${outcomeText}`, source: ev.source || null, negative: totalEffect(eff) < 0,
