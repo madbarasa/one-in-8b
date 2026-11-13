@@ -65,7 +65,7 @@ function paletteFor(countryId, group) {
   return PALETTES[countryId] || (group && GROUP_PALETTES[group]) || PALETTES.china;
 }
 
-export function avatarSVG(country, gender, stage, size = 16, group = null) {
+export function avatarSVG(country, gender, stage, size = 16, group = null, culture = null) {
   const pal = paletteFor(country, group);
   const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
   const alt = pal.clothAlt;
@@ -132,6 +132,8 @@ export function avatarSVG(country, gender, stage, size = 16, group = null) {
   }
   // 老年：拐杖
   if (isOld) s += R(12, bodyY + 2, 1, 8, '#8a6a4a');
+  // 文化圈服饰装饰（v0.9.2：22 圈传统元素，teen 起生效）
+  s += attireDeco(culture, gender, stage, { R, headY, bodyY, bodyH, legY, pal, cloth, alt });
   s += '</svg>';
   return s;
 }
@@ -236,17 +238,12 @@ const ATTIRE = {
   },
 };
 
-// 按圈+性别绘制服饰装饰（儿童只画头部元素，保童装简洁）
+// 按圈+性别绘制服饰装饰（13 岁以下穿童装不加装饰；teen 起坐标与 adult 同构）
 function attireDeco(culture, gender, stage, ctx) {
   const cult = ATTIRE[culture];
-  if (!cult) return '';
+  if (!cult || stage === 'kid') return '';
   const fn = gender === 'female' ? cult.female : cult.male;
   if (!fn) return '';
-  if (stage === 'kid') {
-    // 儿童：只保留头部相关元素（头巾/帽/发饰），跳过衣身纹样
-    const headOnly = fn(ctx).match(/headY[^)]*\)/g) || [];
-    return headOnly.join('');
-  }
   return fn(ctx);
 }
 

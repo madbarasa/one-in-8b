@@ -3,6 +3,7 @@ import { COUNTRIES } from '../data/countries.js';
 import { summarize } from '../engine/life.js';
 import { avatarSVG, sceneSVG, crowdSVG, tombstoneSVG } from './pixel.js';
 import { lifeWheelSVG } from './life-wheel.js';
+import { cultureOfIso } from '../data/culture_groups.js';
 
 const $app = () => document.getElementById('app');
 const $modal = () => document.getElementById('modal-root');
@@ -143,7 +144,7 @@ export function renderGameShell(st, handlers) {
       <aside class="col-left">
         <div class="panel id-card">
           <div class="p-head"><span>身份纪录</span><b>${st.code} ${st.birthYear}</b></div>
-          <div class="id-avatar" id="id-avatar">${avatarSVG(st.country, st.gender, "baby", 44, st.group)}</div>
+          <div class="id-avatar" id="id-avatar">${avatarSVG(st.country, st.gender, "baby", 44, st.group, cultureOfIso(st.iso3))}</div>
           <div class="id-name">${esc(st.name)}</div>
           <div class="id-rows">
             <div><i>性别</i><b>${st.gender === 'male' ? '男' : '女'}</b></div>
@@ -219,7 +220,7 @@ export function updateGame(st) {
   const job = document.getElementById('id-job'); if (job) job.textContent = st.job || '—';
   // 头像随人生阶段更新
   const av = document.getElementById('id-avatar');
-  if (av) av.innerHTML = avatarSVG(st.country, st.gender, stageOf(st.age), 44, st.group);
+  if (av) av.innerHTML = avatarSVG(st.country, st.gender, stageOf(st.age), 44, st.group, cultureOfIso(st.iso3));
   renderTimeline(st);
   renderFamily(st);
   renderMap(st);

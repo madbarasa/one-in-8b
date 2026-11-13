@@ -39,6 +39,17 @@ const ISO_TO_CULTURE = {};
 for (const [culture, isos] of Object.entries(CULTURE_GROUPS)) {
   for (const iso of isos) ISO_TO_CULTURE[iso] = culture;
 }
+// 手工五国（不在圈表内，单独映射）
+ISO_TO_CULTURE.CHN = 'sinic';
+ISO_TO_CULTURE.USA = 'anglo';
+ISO_TO_CULTURE.IND = 'sas-indic';
+ISO_TO_CULTURE.IDN = 'sea-maritime';
+ISO_TO_CULTURE.PAK = 'sas-islam';
+
+// 头像/事件用：iso3 → 文化圈 id（未知国回 null）
+export function cultureOfIso(iso3) {
+  return ISO_TO_CULTURE[iso3] || null;
+}
 
 // 查询：优先文化圈，兜底世行地区组小写
 export function cultureOf(iso3, wbRegion) {
