@@ -3,6 +3,7 @@
 // 程序化重绘，不使用 AI 位图
 
 import { avatarSVG } from './pixel.js';
+import { ERA_TITLES, eraShortTitle } from '../data/events_era.js';
 
 const C = {
   bg: '#F5EDD8',       // 奶白
@@ -170,6 +171,25 @@ export async function buildShareCard(st) {
   const glimpse = buildGlimpse(st);
   x.font = '26px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif'; x.fillStyle = C.ink;
   glimpse.forEach((line, i) => x.fillText(line, W / 2, 1010 + i * 44));
+
+  // 时代印记行（v0.9.4）：金色调一行流式，超宽自动减条目
+  const eraMarks = st.timeline.filter(t => t.id && t.id.startsWith('era-')).map(t => ({
+    age: t.age,
+    title: ERA_TITLES[t.id] || eraShortTitle(t.text),
+  }));
+  if (eraMarks.length) {
+    x.font = '600 20px "JetBrains Mono","Menlo","Microsoft YaHei",monospace'; x.fillStyle = C.ink2;
+    x.fillText('他穿越的时代', W / 2, 1142);
+    x.font = '20px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';
+    let picks = eraMarks.slice(0, 7);
+    let line = '⏳ ' + picks.map(m => `${m.age}岁·${m.title}`).join('  ·  ');
+    while (x.measureText(line).width > W - PAD * 2 && picks.length > 2) {
+      picks = picks.slice(0, picks.length - 1);
+      line = '⏳ ' + picks.map(m => `${m.age}岁·${m.title}`).join('  ·  ');
+    }
+    x.fillStyle = C.gold;
+    x.fillText(line, W / 2, 1180);
+  }
 
   // 底部图标带（地球/心/屋/钟）
   const icons = ['🌍', '❤', '⌂', '⏱'];
