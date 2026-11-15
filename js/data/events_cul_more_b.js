@@ -20,7 +20,7 @@ L('mg-olive-season', 12, 70, 7, '橄榄收获季全家打果子。绿橄榄腌�
 L('mg-rgaibi-music', 14, 70, 6, 'Gnaoua 音乐之夜：卢塔琴、铁响板、通宵的循环节奏。听得入迷的人会「被灵魂附体」——那是音乐在治病。', { hap: 4, rel: 2 }, 'Gnaoua 音乐 2019 年列入 UNESCO 非遗', { cond: MA });
 L('mg-desert-solar', 22, 55, 6, '撒哈拉边的太阳能电站并网了。四百万面镜子追着太阳。你报名做了运维——沙漠终于开始「发电养人」。', { money: 120, know: 2 }, '摩洛哥 Noor 电站 580MW，全球最大 CSP 之一', { cond: MA, once: true });
 L('mg-tagine-friday', 5, 80, 8, '周五主麻日的塔吉锅炖肉全街飘香。谁的锅盖一掀，邻居的孩子就有理由「路过」。', { hap: 4, rel: 3 }, null, { cond: MA });
-L('mg-henna-ashura', 8, 30, 6, '阿舒拉节 kids 的「讨糖夜」：提灯挨家要果子和硬币。你化的鬼脸妆是巷子里最吓人的。', { hap: 4, rel: 2 }, null, { cond: MA, stage: 'child' });
+L('mg-henna-ashura', 8, 30, 6, '阿舒拉节孩子们的「讨糖夜」：提灯挨家要果子和硬币。你化的鬼脸妆是巷子里最吓人的。', { hap: 4, rel: 2 }, null, { cond: MA, stage: 'child' });
 L('mg-remittance-france', 20, 50, 7, '你在法国的工地/餐厅打工。每月汇回家的钱盖了一层楼。村里管你家叫「法国房子」。', { money: 250, rel: 3, hap: -2 }, '摩洛哥侨汇年均 110 亿美元，全球前十五', { cond: MA, once: true });
 
 // ══════════ 阿拉伯核心 ═══════════

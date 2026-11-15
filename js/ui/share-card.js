@@ -93,7 +93,7 @@ export async function buildShareCard(st) {
   x.font = '600 22px "JetBrains Mono","Menlo","Microsoft YaHei",monospace';
   x.fillText('八 十 亿 分 之 一', W / 2, 132);
   x.fillStyle = C.ink2; x.font = '18px "JetBrains Mono","Menlo","Microsoft YaHei",monospace';
-  x.fillText('ONE IN EIGHT BILLION', W / 2, 162);
+  x.fillText('人 生 模 拟 · 每 秒 四 个 婴 儿', W / 2, 162);
 
   // 圆形头像框
   const stage = st.deathInfo?.age >= 60 ? 'elder' : st.age >= 35 ? 'adult' : st.age >= 15 ? 'young' : st.age >= 3 ? 'child' : 'baby';

@@ -1,5 +1,5 @@
 // 国别特色事件库 v0.3.0：美国 18 / 印尼 15 / 巴基斯坦 12 / 中印补位与通用 25
-// 数据出处：CDC / NCHS / UN WPP / WHO GHE / 世界银行 / Pew / EM-DAT / 各国官方统计
+// 数据出处：疾控中心 / NCHS / 联合国人口司 / 世卫组织 GHE / 世界银行 / Pew / 国际灾害数据库 / 各国官方统计
 
 // 美国特色
 const US = [
@@ -7,14 +7,14 @@ const US = [
     id: 'us-thanksgiving', type: 'log', minAge: 5, maxAge: 85, weight: 10,
     cond: s => s.country === 'usa',
     text: '感恩节，一大家子围着火鸡和土豆泥坐下，桌上全是热闹的争论和笑声。',
-    source: '感恩节是美国出行量最大的节日，约 5000 万人返乡（AAA）',
+    source: '感恩节是美国出行量最大的节日，约 5000 万人返乡（美国汽车协会）',
     effect: { rel: 3, hap: 2 },
   },
   {
     id: 'us-shooter-drill', type: 'log', minAge: 6, maxAge: 17, weight: 14,
     cond: s => s.country === 'usa',
     text: '学校又组织了「封锁演习」：锁门、关灯、躲进墙角，保持安静。这已经是这学期的第二次。',
-    source: '2024 年美国发生 330 余起校园枪击事件（K-12 枪击数据库）',
+    source: '2024 年美国发生 330 余起校园枪击事件（K 型12 枪击数据库）',
     effect: { hap: -3, know: 1 },
   },
   {
@@ -22,7 +22,7 @@ const US = [
     cond: s => s.country === 'usa',
     title: '十六岁，方向盘',
     text: '同学们都在考驾照了。在这个没有车几乎哪儿也去不了的国家，方向盘意味着自由。',
-    source: '美国约 86% 的成年人持有驾照（FHWA）',
+    source: '美国约 86% 的成年人持有驾照（联邦公路管理局）',
     options: [
       { label: '考驾照，家里出钱买辆二手车', outcome: '你开着一辆掉漆的老车上学，后备箱塞满体育器材。', effect: { hap: 4, rel: 2, money: -1500 } },
       { label: '先不考，坐校车和朋友的顺风车', outcome: '你成了拼车常客，跟谁都能聊起来。', effect: { rel: 4 } },
@@ -38,7 +38,7 @@ const US = [
     id: 'us-tip-job', type: 'log', minAge: 16, maxAge: 22, weight: 14,
     cond: s => s.country === 'usa' && !s.firedEvents.has('us-tip-job'),
     text: '你在餐厅端盘子赚小费，周末忙到脚不沾地，小票夹越来越鼓。',
-    source: '美国约 400 万人在全职从事小费岗位（BLS）',
+    source: '美国约 400 万人在全职从事小费岗位（劳工统计局）',
     effect: { money: 900, rel: 2, hp: -1 },
   },
   {
@@ -57,7 +57,7 @@ const US = [
     id: 'us-debt-pay', type: 'log', minAge: 23, maxAge: 42, weight: 10, once: false,
     cond: s => s.country === 'usa' && s.money < 30000,
     text: '这个月工资单的固定一行又划走了：学贷还款。',
-    source: '美国学贷借款人平均负债约 3.8 万美元（Education Data Initiative）',
+    source: '美国学贷借款人平均负债约 3.8 万美元（美国教育数据倡议）',
     effect: { money: -900, hap: -1 },
   },
   {
@@ -71,28 +71,28 @@ const US = [
     id: 'us-car-accident', type: 'log', minAge: 16, maxAge: 30, weight: 6,
     cond: s => s.country === 'usa',
     text: '路口的一次让让抢抢，你出了人生第一场车祸，人没事，保险费涨了。',
-    source: '美国交通年死亡约 4 万人，为发达国家最高（NHTSA）',
+    source: '美国交通年死亡约 4 万人，为发达国家最高（美国道路交通安全管理局）',
     effect: { hp: -3, money: -800 },
   },
   {
     id: 'us-opioid', type: 'log', minAge: 20, maxAge: 48, weight: 3,
     cond: s => s.country === 'usa',
     text: '腰伤之后医生开的止痛药，不知不觉越吃越多。戒掉它们花了你一年。',
-    source: '阿片类药物过量每年夺走约 8 万美国人生命（CDC）',
+    source: '阿片类药物过量每年夺走约 8 万美国人生命（疾控中心）',
     effect: { hp: -7, hap: -5 },
   },
   {
     id: 'us-hurricane', type: 'log', minAge: 0, maxAge: 85, weight: 7,
     cond: s => s.country === 'usa',
     text: '飓风来的那几天，全家用胶带封好窗户，然后沿着疏散路线堵在了高速公路上。',
-    source: '大西洋飓风季年均产生约 14 个命名风暴（NOAA）',
+    source: '大西洋飓风季年均产生约 14 个命名风暴（美国国家海洋大气局）',
     effect: { hap: -3, money: -700 },
   },
   {
     id: 'us-wildfire', type: 'log', minAge: 0, maxAge: 85, weight: 6,
     cond: s => s.country === 'usa',
     text: '山火烧到了邻县，天空连着一周都是橙灰色的，出门要戴 N95。',
-    source: '美国 2024 年山火烧毁面积超过 400 万英亩（NIFC）',
+    source: '美国 2024 年山火烧毁面积超过 400 万英亩（国家火灾中心）',
     effect: { hp: -3, hap: -2 },
   },
   {
@@ -111,21 +111,21 @@ const US = [
     id: 'us-therapy', type: 'log', minAge: 25, maxAge: 60, weight: 8,
     cond: s => s.country === 'usa' && s.money > 2000,
     text: '你开始定期见心理咨询师，聊那些从没跟人说过的事。',
-    source: '美国约四分之一的成年人在过去一年接受过心理健康服务（CDC）',
+    source: '美国约四分之一的成年人在过去一年接受过心理健康服务（疾控中心）',
     effect: { hap: 4, money: -900 },
   },
   {
     id: 'us-401k', type: 'log', minAge: 28, maxAge: 62, weight: 8, once: false,
     cond: s => s.country === 'usa' && s.job,
     text: '你往 401(k) 退休账户里又存了一年钱，公司按比例配了一部分。',
-    source: '约 6800 万美国人持有 401(k) 账户（ICI）',
+    source: '约 6800 万美国人持有 401k 退休账户（投资公司协会）',
     effect: { money: 2500 },
   },
   {
     id: 'us-election', type: 'log', minAge: 19, maxAge: 90, weight: 10, once: false,
     cond: s => s.country === 'usa',
     text: '大选日，你排了半小时队投下自己的一票，领到了「I VOTED」贴纸。',
-    source: '2024 年美国总统选举投票率 63.9%，为近一个世纪最高（AP）',
+    source: '2024 年美国总统选举投票率 63.9%，为近一个世纪最高（美联社）',
     effect: { know: 2, hap: 1 },
   },
   {
@@ -142,14 +142,14 @@ const IDN = [
     id: 'id-volcano', type: 'log', minAge: 0, maxAge: 85, weight: 9,
     cond: s => s.country === 'indonesia',
     text: '附近的山又「醒了」：火山灰落满院子，你们收拾细软坐上了政府安排的卡车。',
-    source: '印尼拥有 127 座活火山，数量全球第一（PVMBG）',
+    source: '印尼拥有 127 座活火山，数量全球第一（印尼火山地质局）',
     effect: { hp: -2, hap: -3, money: -400 },
   },
   {
     id: 'id-quake', type: 'log', minAge: 0, maxAge: 85, weight: 10,
     cond: s => s.country === 'indonesia',
     text: '深夜的强震把碗柜摇得哐哐响，全家跑到屋外空地上等着，直到震感过去。',
-    source: '印尼位于环太平洋地震带，年均发生数千次有感地震（BMKG）',
+    source: '印尼位于环太平洋地震带，年均发生数千次有感地震（印尼气象局）',
     effect: { hp: -1, hap: -3 },
   },
   {
@@ -170,7 +170,7 @@ const IDN = [
     id: 'id-mudik', type: 'log', minAge: 20, maxAge: 70, weight: 10,
     cond: s => s.country === 'indonesia' && s.region === '城市',
     text: '开斋节前，你挤上了返乡的大巴，堵在路上的时间比睡觉的时间还长，但值得。',
-    source: '印尼年度返乡潮 Mudik 覆盖数千万人次出行',
+    source: '印尼年度返乡潮 开斋节返乡潮 覆盖数千万人次出行',
     effect: { rel: 4, hap: 3, money: -150 },
   },
   {
@@ -227,13 +227,13 @@ const IDN = [
     id: 'id-languages', type: 'log', minAge: 6, maxAge: 18, weight: 9,
     cond: s => s.country === 'indonesia' && s.inSchool,
     text: '你在家说方言，在学校说印尼语，补习班还要学英语，脑子里住着三种话。',
-    source: '印尼活跃语言超过 700 种，数量居全球第二（Ethnologue）',
+    source: '印尼活跃语言超过 700 种，数量居全球第二（民族语言数据库）',
     effect: { know: 3 },
   },
   {
     id: 'id-kos', type: 'log', minAge: 18, maxAge: 26, weight: 9,
     cond: s => s.country === 'indonesia' && s.region === '城市' && !s.house,
-    text: '你搬进了城里的出租屋（Kos）：一张床、一台风扇、共用的水龙头，房东阿姨管得很严。',
+    text: '你搬进了城里的出租屋（科索沃）：一张床、一台风扇、共用的水龙头，房东阿姨管得很严。',
     effect: { money: -500, rel: 1, know: 1 },
   },
   {
@@ -283,14 +283,14 @@ const PK = [
     id: 'pk-child-labor', type: 'log', minAge: 10, maxAge: 15, weight: 11,
     cond: s => s.country === 'pakistan' && s.wealthIdx <= 1,
     text: '放学后你去地毯作坊打零工，手指被线勒出一道道印子，换回几张纸币。',
-    source: '巴基斯坦童工约 330 万人，多数从事农业与手工业（ILO）',
+    source: '巴基斯坦童工约 330 万人，多数从事农业与手工业（国际劳工组织）',
     effect: { know: -2, money: 180, hp: -2 },
   },
   {
     id: 'pk-gulf-remittance', type: 'log', minAge: 10, maxAge: 60, weight: 9,
     cond: s => s.country === 'pakistan' && s.wealthIdx <= 3,
     text: '在迪拜做工的叔叔寄回了这个月的汇款，家里的债松了一口气。',
-    source: '巴基斯坦年海外汇款约 300 亿美元，约占 GDP 的 8%（巴基斯坦央行）',
+    source: '巴基斯坦年海外汇款约 300 亿美元，约占 国内生产总值 的 8%（巴基斯坦央行）',
     effect: { money: 1400, rel: 1 },
   },
   {
@@ -329,7 +329,7 @@ const PK = [
     id: 'pk-blast', type: 'log', minAge: 15, maxAge: 70, weight: 3,
     cond: s => s.country === 'pakistan',
     text: '集市的远处传来闷响，人群尖叫着涌过来，那天的摊位再没开张。',
-    source: '2009-2014 年间巴基斯坦恐袭高发，年均数百起（SATP）',
+    source: '2009-2014 年间巴基斯坦恐袭高发，年均数百起（南亚恐怖主义门户）',
     effect: { hap: -6, hp: -1 },
   },
   {
@@ -412,7 +412,7 @@ const CN = [
     id: 'cn-livestream', type: 'log', minAge: 18, maxAge: 40, weight: 9,
     cond: s => s.country === 'china',
     text: '你在直播间抢到了九块九包邮的抽纸，省下的钱换成了两杯奶茶。',
-    source: '中国网络直播用户规模超 8 亿，电商直播年成交额数万亿元（CNNIC）',
+    source: '中国网络直播用户规模超 8 亿，电商直播年成交额数万亿元（中国互联网络信息中心）',
     effect: { hap: 2, money: -200 },
   },
   {
@@ -433,7 +433,7 @@ const CN = [
     id: 'cn-smartphone-senior', type: 'log', minAge: 60, maxAge: 80, weight: 10,
     cond: s => s.country === 'china',
     text: '孙女教会了你用智能手机：视频通话、看短视频、发语音，你一样样学得认真。',
-    source: '中国 60 岁以上网民规模超 1.5 亿（CNNIC）',
+    source: '中国 60 岁以上网民规模超 1.5 亿（中国互联网络信息中心）',
     effect: { know: 2, hap: 3, rel: 2 },
   },
   {
@@ -451,7 +451,7 @@ const IN = [
     id: 'in-ipl-night', type: 'log', minAge: 8, maxAge: 45, weight: 10,
     cond: s => s.country === 'india',
     text: '板球联赛决赛之夜，整个街区都聚在茶摊的电视机前，六分球一出现满街都在放炮。',
-    source: '印度板球超级联赛（IPL）决赛观众超 4 亿人次',
+    source: '印度板球超级联赛（印度板球超级联赛）决赛观众超 4 亿人次',
     effect: { hap: 3, rel: 2 },
   },
   {
@@ -466,7 +466,7 @@ const IN = [
     cond: s => s.country === 'india' && s.wealthIdx >= 2,
     title: '十八岁，代码改变命运',
     text: '学长从班加罗尔回乡，讲起软件园区里的工资数字。理工科的同学都在往计算机专业挤。',
-    source: '印度 IT 服务业年营收约 2500 亿美元，直接就业超 500 万人（NASSCOM）',
+    source: '印度 IT 服务业年营收约 2500 亿美元，直接就业超 500 万人（印度软件行业协会）',
     options: [
       { label: '挤进计算机专业', outcome: '你在闷热的宿舍里刷了四年题，毕业进了一家外包公司，从此家里有了第一条中产的缝。', effect: { know: 8, money: 3000, hap: -1 } },
       { label: '选了自己真正喜欢的文科', outcome: '你读得快乐，但毕业后的招聘会上，你的专业对口岗位一只手数得过来。', effect: { know: 5, hap: 3, money: 500 } },
@@ -508,7 +508,7 @@ const IN = [
     id: 'in-aadhaar', type: 'log', minAge: 5, maxAge: 18, weight: 8,
     cond: s => s.country === 'india',
     text: '你按了指纹、拍了照，拿到了一张印着 12 位数字的身份卡。从此政府在系统里「认识」你。',
-    source: '印度 Aadhaar 数字身份系统覆盖超 13 亿人，全球最大',
+    source: '印度 全民身份系统 Aadhaar 数字身份系统覆盖超 13 亿人，全球最大',
     effect: { know: 2 },
   },
 ];
@@ -526,14 +526,14 @@ const COMMON = [
     id: 'gen-layoff', type: 'log', minAge: 30, maxAge: 55, weight: 8,
     cond: s => s.job,
     text: '公司「优化」的名单出来了，你的工位邻居也在上面。请他吃了顿散伙饭。',
-    source: '全球每年仍有数千万岗位因经济波动消失（ILO）',
+    source: '全球每年仍有数千万岗位因经济波动消失（国际劳工组织）',
     effect: { hap: -4, money: -500 },
   },
   {
     id: 'gen-nightshift', type: 'log', minAge: 25, maxAge: 45, weight: 8,
     cond: s => s.job,
     text: '为了夜班津贴，你连着上了三个月夜班，生物钟彻底乱了，眼圈黑得像熊猫。',
-    source: '世界约五分之一的劳动者从事轮班或夜间工作（ILO）',
+    source: '世界约五分之一的劳动者从事轮班或夜间工作（国际劳工组织）',
     effect: { money: 1000, hp: -3, hap: -2 },
   },
   {

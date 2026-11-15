@@ -44,12 +44,12 @@ export function renderHome(onBirth) {
       </div>
       <div class="era-picker">
         <label>出生年代：<b id="era-label">今日世界（2026）</b></label>
-        <input type="range" id="era-slider" min="1950" max="2026" value="2026" step="1" />
+        <input type="range" id="era-slider" min="1950" max="2026" value="1990" step="1" />
         <div class="era-marks"><span>1950</span><span>1975</span><span>2000</span><span id="era-mark-now">2026</span></div>
-        <p class="era-note" id="era-note">默认投生此刻。拖动滑块，你可以选择出生在过去的任何一个年份——按那一年的真实统计出生、成长、老去。</p>
+        <p class="era-note" id="era-note">默认投生 1990 年——一个能亲历冷战落幕与互联网浪潮的年代。拖动滑块，可选 1950 至今任何一年，按那一年的真实统计出生、成长、老去。</p>
       </div>
       <button class="btn-birth" id="btn-birth">出　生</button>
-      <p class="home-note">复刻研究版 · 数据来自世界银行 API / UN WPP / WHO · 覆盖 217 个国家与地区 · 全球新生儿 100% 抽样空间</p>
+      <p class="home-note">复刻研究版 · 数据来自世界银行、联合国人口司、世界卫生组织 · 覆盖 217 个国家与地区 · 全球新生儿 100% 抽样空间</p>
       <div class="home-opts">
         <label class="opt-classroom"><input type="checkbox" id="opt-classroom"> 教室模式（缓和沉重主题，适合课堂）</label>
       </div>
@@ -92,7 +92,7 @@ export function renderHome(onBirth) {
     };
     const near = Object.keys(notes).map(Number).reduce((a, b) => Math.abs(b - y) < Math.abs(a - y) ? b : a);
     document.getElementById('era-note').textContent = y >= 2026
-      ? '默认投生此刻。拖动滑块，你可以选择出生在过去的任何一个年份——按那一年的真实统计出生、成长、老去。'
+      ? '默认投生 1990 年——一个能亲历冷战落幕与互联网浪潮的年代。拖动滑块，可选 1950 至今任何一年，按那一年的真实统计出生、成长、老去。'
       : '你将按 ' + y + ' 年的真实统计出生：当年的出生分布、预期寿命、婴儿死亡率。活得过童年，才谈得上人生。';
   };
   // 实时世界计数器：全球每秒出生约 4.25、死亡约 1.96（世行口径折算）
@@ -116,7 +116,7 @@ export function renderBirthCard(b, cardNo, onStart) {
   $app().innerHTML = `
   <div class="screen-birth">
     <div class="birth-card">
-      <div class="bc-head"><span class="t">出生登记</span><span class="no">No. ${cardNo}</span></div>
+      <div class="bc-head"><span class="t">出生登记</span><span class="no">编号 ${cardNo}</span></div>
       <div class="bc-name">${esc(b.name)}</div>
       ${b.historical ? `<span class="bc-era-tag">${b.birthYear} 年 · 历史世界</span>` : ''}
       <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72, b.group)}</div>
@@ -126,14 +126,14 @@ export function renderBirthCard(b, cardNo, onStart) {
         <div><i>出生国家</i><b>${b.countryName}</b></div>
         <div><i>出生地</i><b>${b.region}</b></div>
         <div><i>家境</i><b>${b.wealth}</b></div>
-        <div><i>家庭年收入</i><b>${b.household.ppp.toLocaleString()} PPP国际元</b></div>
+        <div><i>家庭年收入</i><b>${b.household.ppp.toLocaleString()} 国际元（购买力平价）</b></div>
         <div><i>按美国物价</i><b>≈ ${b.household.usd.toLocaleString()} 美元</b></div>
         <div><i>父亲</i><b>${esc(b.father.name)} · ${b.father.age}岁</b></div>
         <div><i>母亲</i><b>${esc(b.mother.name)} · ${b.mother.age}岁</b></div>
         <div><i>信仰</i><b>${b.religion}</b></div>
         <div><i>平均寿命</i><b>${b.lifeExpectancy}岁</b></div>
       </div>
-      <div class="bc-note">家境：五分位中的第 ${b.wealthIdx + 1} 位 · 人均 GDP ${b.gdpPpp.toLocaleString()} 国际元（PPP）</div>
+      <div class="bc-note">家境：五分位中的第 ${b.wealthIdx + 1} 位 · 人均国内生产总值 ${b.gdpPpp.toLocaleString()} 国际元</div>
       <button class="btn-continue" id="btn-start">继续</button>
     </div>
   </div>`;
@@ -178,7 +178,7 @@ export function renderGameShell(st, handlers) {
           ${statRow('rel', '人际关系', st.stats.rel, 'var(--accent)')}
         </div>
         <div class="panel money-panel">
-          <div class="p-head"><span>净資產</span><b>PPP 换算</b></div>
+          <div class="p-head"><span>净资产</span><b>购买力平价</b></div>
           <div class="money-big" id="money-num">${fmtMoney(st.money)}</div>
           <div class="money-sub" id="money-detail">年收入 <span id="income-num">${fmtMoney(st.yearlyIncome || 0)}</span> · 年支出 <span id="cost-num">${fmtMoney(st.yearlyCost || 0)}</span></div>
         </div>
@@ -357,7 +357,7 @@ export function renderEnd(st, onRestart, peers, opts = {}) {
   $app().innerHTML = `
   <div class="screen-end">
     <div class="end-card">
-      <div class="end-head"><span class="t">死亡纪录 · RECORD OF DEATH</span><span>No. ${st.cardNo || st.code + '-' + d.year}</span></div>
+      <div class="end-head"><span class="t">死亡纪录</span><span>编号 ${st.cardNo || st.code + '-' + d.year}</span></div>
       <div class="end-life">
         <div class="end-tomb">${tombstoneSVG(st)}</div>
         <div class="name">${esc(st.name)}</div>

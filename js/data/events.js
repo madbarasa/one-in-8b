@@ -38,6 +38,7 @@ import { ERA_EVENTS } from './events_era.js';
 import { PHASE_EVENTS } from './events_phase.js';
 import { CUL_MORE_A } from './events_cul_more_a.js';
 import { CUL_MORE_B } from './events_cul_more_b.js';
+import { CHOICE_CUL } from './events_choice_cul.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -47,13 +48,13 @@ const add = (e) => E.push(e);
 add({
   id: 'born-vaccine', type: 'log', minAge: 0, maxAge: 0, weight: 30,
   text: '你完成了卡介苗和乙肝疫苗的第一针接种。',
-  source: '全球约 84% 的婴儿完成了三剂 DTP 疫苗接种（WHO·UNICEF）',
+  source: '全球约 84% 的婴儿完成了三剂 白百破三联 疫苗接种（世卫组织·联合国儿童基金会）',
   effect: { hp: 2 },
 });
 add({
   id: 'born-record', type: 'log', minAge: 0, maxAge: 0, weight: 20,
   text: '你的出生被登记在册，成为这个世界统计数字中的一个。',
-  source: '每年约 1.3 亿名婴儿诞生（UN WPP 2024）',
+  source: '每年约 1.3 亿名婴儿诞生（联合国人口司 2024）',
   effect: {},
 });
 
@@ -72,7 +73,7 @@ add({
   id: 'infant-diarrhea', type: 'log', minAge: 0, maxAge: 3, weight: 12,
   cond: s => s.country === 'india' && s.wealthIdx <= 2,
   text: '一场腹泻让你虚弱了很久，幸亏及时喝上了口服补液盐。',
-  source: '腹泻是 5 岁以下儿童的第三大死因（WHO）',
+  source: '腹泻是 5 岁以下儿童的第三大死因（世卫组织）',
   effect: { hp: -6 },
 });
 add({
@@ -114,7 +115,7 @@ add({
 add({
   id: 'disaster-heat', type: 'log', minAge: 2, maxAge: 12, weight: 8,
   text: '破纪录的热浪来袭，有一阵子都没办法到外面玩。',
-  source: '仅 2023 年一年，全球约 9300 万人受自然灾害影响（EM-DAT）',
+  source: '仅 2023 年一年，全球约 9300 万人受自然灾害影响（国际灾害数据库）',
   effect: { hp: -3, hap: -2 },
 });
 add({
@@ -129,7 +130,7 @@ add({
   id: 'primary-school', type: 'choice', minAge: 6, maxAge: 6,
   title: '六岁，背上书包',
   text: '到了上学的年纪。村口学校的铃声、陌生的同学、坐不住的板凳——你的学生时代开始了。',
-  source: '全球初等教育入学率约 87%（UNESCO UIS）',
+  source: '全球初等教育入学率约 87%（联合国教科文组织 教科文组织统计所）',
   options: [
     { label: '开开心心去上学', outcome: '你成了班里举手最积极的那一个。', effect: { know: 5, hap: 2, rel: 2 } },
     { label: '躲在家人身后不肯进教室', outcome: '老师在门口牵了你很久，你才抽抽搭搭坐进座位。', effect: { know: 3, hap: -1 } },
@@ -192,7 +193,7 @@ add({
   id: 'teen-work-or-school', type: 'choice', minAge: 12, maxAge: 12,
   title: '要升初中吗？',
   text: '小学毕业了。家里的经济状况和你的成绩，都在替你权衡这条路。',
-  source: '在印度，大约有 86% 的孩子读完初中（UNESCO UIS）',
+  source: '在印度，大约有 86% 的孩子读完初中（联合国教科文组织 教科文组织统计所）',
   options: [
     { label: '继续读书', outcome: '你背上新书包走进了中学。', effect: { know: 5 }, setSchool: true },
     { label: '开始工作，帮忙家里', outcome: '你放下了书包，稚嫩的肩膀扛起了生活的重量。', effect: { money: 1500, know: -3, hap: -2 }, setSchool: false },
@@ -202,7 +203,7 @@ add({
   id: 'teen-high-school', type: 'choice', minAge: 15, maxAge: 15,
   title: '初中毕业的岔路口',
   text: '中考/升学考近在眼前。读高中意味着更多年不能挣钱，但门后会是不一样的世界。',
-  source: '中国初中毕业生升学率约 91%；印度完成高中阶段者不足一半（UNESCO）',
+  source: '中国初中毕业生升学率约 91%；印度完成高中阶段者不足一半（联合国教科文组织）',
   options: [
     { label: '继续读高中', outcome: '你考进了高中，教室后墙的倒计时牌开始了。', effect: { know: 6 }, setSchool: true },
     { label: '去读职业学校', outcome: '你选了一门手艺，实训车间成了你的新教室。', effect: { know: 3, money: 800 }, setSchool: false, setVocational: true },
@@ -215,7 +216,7 @@ add({
   id: 'young-college', type: 'choice', minAge: 18, maxAge: 18,
   title: '十八岁，大学还是社会？',
   text: '高考/毕业季到了。录取通知书和招聘广告同时摆在你的面前。',
-  source: '中国高等教育毛入学率约 60%；印度青年入学率约 33%（UNESCO）',
+  source: '中国高等教育毛入学率约 60%；印度青年入学率约 33%（联合国教科文组织）',
   options: [
     { label: '考大学', outcome: '你如愿走进大学校园，在图书馆里泡了四年。', effect: { know: 12, hap: 3 }, setSchool: true, setDegree: '大学' },
     { label: '找一份工作', outcome: '你提前进入了劳动力市场。', effect: { money: 2000 }, setSchool: false },
@@ -225,7 +226,7 @@ add({
   id: 'young-first-job', type: 'choice', minAge: 19, maxAge: 22,
   title: '你找到了第一份工作',
   text: '学历：{degree}。摆在面前的机会都不算体面，但每一份都真实地摆在那里。',
-  source: '印度劳工统计约 82% 为非正规就业（ILO 推估）；农业就业者约 43%',
+  source: '印度劳工统计约 82% 为非正规就业（国际劳工组织 推估）；农业就业者约 43%',
   options: [
     { label: '小农/家庭帮工', outcome: '你开始了靠天吃饭的日子。', effect: { hp: 2 }, job: '小农', income: 4900 },
     { label: '渔民/短工', outcome: '风吹日晒，收入不稳但自由。', effect: { hp: 1 }, job: '短工', income: 5100 },
@@ -245,7 +246,7 @@ add({
   id: 'young-marriage', type: 'choice', minAge: 22, maxAge: 30,
   title: '婚姻的大日子',
   text: '婚期定下来了。婚礼是一生中最热闹的一天，也是两家人最操心的一天。',
-  source: '中国平均初婚年龄约 28 岁；印度女性约 22 岁（UN）',
+  source: '中国平均初婚年龄约 28 岁；印度女性约 22 岁（联合国）',
   options: [
     { label: '办一场体面的婚礼', outcome: '热闹了三天，家底也薄了一层，但值得。', effect: { hap: 6, rel: 3, money: -20000 }, marry: true },
     { label: '简单领证就好', outcome: '两家人吃了一顿饭，日子从简过。', effect: { hap: 4, rel: 1, money: -2000 }, marry: true },
@@ -258,7 +259,7 @@ add({
   id: 'adult-baby', type: 'choice', minAge: 24, maxAge: 34,
   title: '要孩子吗？',
   text: '婚后，两家人都在盼着新生命的到来。你也无数次问过自己。',
-  source: '中国总和生育率约 1.0；印度约 2.0（UN WPP 2024）',
+  source: '中国总和生育率约 1.0；印度约 2.0（联合国人口司 2024）',
   options: [
     { label: '要一个孩子', outcome: '十月怀胎，产房外你听见了一声啼哭。', effect: { hap: 6, rel: 2, money: -5000 }, haveChild: true },
     { label: '再过两年二人世界', outcome: '你们决定先把日子过稳。', effect: { hap: 1 }, haveChild: false },
@@ -270,7 +271,7 @@ add({
   id: 'adult-childcare', type: 'choice', minAge: 25, maxAge: 38,
   title: '谁来照顾孩子？',
   text: '孩子还小，工作放不下，家里离不开。这道题几乎没有完美答案。',
-  source: '印度女性劳动参与率约 22%（ILO 2019）',
+  source: '印度女性劳动参与率约 22%（国际劳工组织 2019）',
   options: [
     { label: '自己减少工作照顾', outcome: '你的职业停了半拍，孩子的童年被填得很满。', effect: { hap: 3, money: -8000 }, jobBreak: true },
     { label: '交给祖辈照顾', outcome: '老人重新操起了带娃的手艺，隔代的亲昵无可替代。', effect: { rel: 4 }, jobBreak: false },
@@ -316,7 +317,7 @@ add({
 add({
   id: 'mid-hypertension', type: 'log', minAge: 40, maxAge: 65, weight: 10,
   text: '体检单上出现了「高血压」三个字，医生叮嘱你少吃咸、多走路。',
-  source: '全球 30-79 岁人群中约 1/3 患高血压（WHO）',
+  source: '全球 30-79 岁人群中约 1/3 患高血压（世卫组织）',
   effect: { hp: -5 },
 });
 add({
@@ -378,7 +379,7 @@ add({
   cond: s => s.gender === 'male' && s.stats.rel > 45,
   title: '巷子口的烟',
   text: '要好的朋友递来一支烟：「就一口，试试而已。」周围的人都在看。',
-  source: '全球首次吸烟年龄集中在 13-15 岁（WHO 全球学生健康调查）',
+  source: '全球首次吸烟年龄集中在 13-15 岁（世卫组织 全球学生健康调查）',
   options: [
     { label: '接过来看看', outcome: '你咳得眼泪都出来了。但那一晚你觉得自己合群了。', effect: { hp: -3, rel: 4 } },
     { label: '明确拒绝', outcome: '有人笑你胆小。但后来想抽烟时，第一个想到的是你的话。', effect: { hap: 1, rel: -2 } },
@@ -395,7 +396,7 @@ add({
 add({
   id: 'school-bully', type: 'log', minAge: 11, maxAge: 15, weight: 7,
   text: '班里几个高个子总在放学路上堵你。你开始绕远路回家，谁也没告诉。',
-  source: '全球约 32% 的学生曾遭受校园欺凌（UNESCO）',
+  source: '全球约 32% 的学生曾遭受校园欺凌（联合国教科文组织）',
   effect: { hap: -8, rel: -3 },
 });
 add({
@@ -414,7 +415,7 @@ add({
   id: 'rural-dropout-work', type: 'log', minAge: 15, maxAge: 17, weight: 6,
   cond: s => s.country === 'india' && s.region === '乡村' && s.wealthIdx <= 1,
   text: '家里的债压得紧。你收拾书包那年，同村的伙伴们大多已经在外省的工地上了。',
-  source: '印度约有 1,040 万名儿童青少年失学（UNESCO UIS）',
+  source: '印度约有 1,040 万名儿童青少年失学（联合国教科文组织 教科文组织统计所）',
   effect: { know: -6, hap: -4 }, action: s => { s.inSchool = false; },
 });
 add({
@@ -459,7 +460,7 @@ add({
   id: 'job-search-adult', type: 'log', minAge: 23, maxAge: 38, weight: 14,
   cond: s => !s.job && !s.inSchool && s.degree !== '（辍学）',
   text: '你投出几十份简历后，终于收到了录用通知。上班第一天，你把工牌擦了又擦。',
-  source: 'ILO：全球青年就业质量持续分化（2024）',
+  source: '国际劳工组织：全球青年就业质量持续分化（2024）',
   action: s => {
     s.job = s.degree === '大学' ? '公司职员' : s.degree === '职业学校' ? '技术工人' : '商店店员';
     s.income = Math.round(s.gdpPpp * (s.degree === '大学' ? 0.9 : 0.55));
@@ -481,7 +482,7 @@ add({
   cond: s => !s.house && s.money > s.gdpPpp * 1.5 && !s.retired,
   title: '一套自己的房子',
   text: `中介带你看了一天的房。首付要掏空大半积蓄，之后每个月都是固定的月供。买，还是继续租？`,
-  source: '全球主要经济体房价收入比持续走高（IMF 住房监测）',
+  source: '全球主要经济体房价收入比持续走高（国际货币基金组织 住房监测）',
   options: [
     { label: '咬牙买下', outcome: '拿到钥匙那天你在空荡荡的客厅坐了很久。这是你的了。', effect: { hap: 8, rel: 3 }, money: s => -Math.round(s.gdpPpp * 1.2), action: s => { s.house = true; } },
     { label: '再等等', outcome: '后来房价涨了又跌。你始终没能下定决心。', effect: { hap: -1 } },
@@ -492,7 +493,7 @@ add({
   cond: s => !s.spouse && !s.engaged,
   title: '相亲桌上的第三个人',
   text: '亲戚又安排了一场相亲。对方条件合适，性格也温和。但你总觉得少了点什么。',
-  source: '全球初婚年龄持续推迟（UN 世界婚姻数据 2022）',
+  source: '全球初婚年龄持续推迟（联合国 世界婚姻数据 2022）',
   options: [
     { label: '认真处下去', outcome: '半年后你们领了证。日子不轰轰烈烈，但很踏实。', effect: { hap: 6, rel: 4 }, action: s => { s.spouse = genFamilyName(s.rng, s.country, s.gender === 'male' ? 'female' : 'male'); s.spouseAge = s.age + s.rng.int(-4, 3); } },
     { label: '再等等对的人', outcome: '家人叹气。你搬去了离他们更远一点的地方，自己过日子。', effect: { rel: -4 } },
@@ -534,7 +535,7 @@ add({
   cond: s => s.father.alive || s.mother.alive,
   title: '病房外的长夜',
   text: '父亲住了院。医生把你拉到一边说需要长期照护。你是家里的独苗，工作请不了长假。',
-  source: '全球老龄化加速，长期照护缺口扩大（WHO 老年健康报告）',
+  source: '全球老龄化加速，长期照护缺口扩大（世卫组织 老年健康报告）',
   options: [
     { label: '辞职回家照顾', outcome: '你陪父亲走完了治疗期。再找工作时，简历上有了一段两年的空白。', effect: { rel: 6, hap: 2 }, action: s => { s.job = null; s.income = 0; s.father.alive = false; } },
     { label: '请护工分担', outcome: '护工很尽责，你每周探望两次。父亲嘴上说不用总来，眼睛却一直追着你。', effect: { money: s => -Math.round(s.gdpPpp * 0.5), rel: 2 } },
@@ -543,7 +544,7 @@ add({
 add({
   id: 'health-check', type: 'log', minAge: 38, maxAge: 70, weight: 7,
   text: '体检报告出来：血压偏高，其他尚可。医生叮嘱少油少盐，多走路。',
-  source: '全球约 13 亿人患高血压，知晓率不足半数（WHO 2023）',
+  source: '全球约 13 亿人患高血压，知晓率不足半数（世卫组织 2023）',
   effect: { hp: -2 }, action: s => { s.chronic = s.chronic || []; s.chronic.push('高血压'); },
 });
 add({
@@ -579,7 +580,7 @@ add({
   id: 'elder-fall', type: 'log', minAge: 70, maxAge: 105, weight: 10,
   cond: s => s.stats.hp < 60,
   text: '浴室里滑了一跤，股骨骨折。躺在病床上你第一次承认：自己是老人了。',
-  source: '跌倒是全球 65 岁以上老人伤害死亡的首要原因（WHO）',
+  source: '跌倒是全球 65 岁以上老人伤害死亡的首要原因（世卫组织）',
   effect: { hp: -10, hap: -6 },
 });
 add({
@@ -618,7 +619,7 @@ add({
 add({
   id: 'diabetes', type: 'log', minAge: 50, maxAge: 85, weight: 6,
   text: '查出糖尿病。从这天起，甜的东西都要忌口了。',
-  source: '全球约 8.3 亿人患糖尿病，过半未获治疗（Lancet 2024）',
+  source: '全球约 8.3 亿人患糖尿病，过半未获治疗（《柳叶刀》 2024）',
   effect: { hp: -4 }, action: s => { s.chronic = s.chronic || []; s.chronic.push('糖尿病'); },
 });
 add({
@@ -633,13 +634,13 @@ add({
   id: 'disaster-flood', type: 'log', minAge: 1, maxAge: 100, weight: 4,
   cond: s => s.region === '乡村',
   text: '夏天暴雨连下了半个月，河水漫进了院子。全村人蹲在房顶上等救援。',
-  source: '仅 2023 年就有约 9300 万人受自然灾害影响（EM-DAT）',
+  source: '仅 2023 年就有约 9300 万人受自然灾害影响（国际灾害数据库）',
   effect: { hap: -7 }, action: s => { s.money = Math.max(0, s.money - Math.round(s.gdpPpp * 0.2)); },
 });
 add({
   id: 'disaster-heatwave', type: 'log', minAge: 1, maxAge: 100, weight: 4,
   text: '破纪录的热浪持续了四十天，有一阵子谁都没法出门。',
-  source: '2023 年为有记录以来最热一年（WMO）',
+  source: '2023 年为有记录以来最热一年（世界气象组织）',
   effect: { hap: -3, hp: -2 },
 });
 add({
@@ -690,6 +691,7 @@ E.push(...ERA_EVENTS);
 E.push(...PHASE_EVENTS);
 E.push(...CUL_MORE_A);
 E.push(...CUL_MORE_B);
+E.push(...CHOICE_CUL);
 
 // id 去重：保留先注册的（v0.7 优先），后注册的同 id 丢弃（v0.9.3）
 const seenIds = new Set();
