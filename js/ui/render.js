@@ -344,12 +344,13 @@ const HELPLINES = {
   pakistan: 'Rozan UAN +92 51 111 533 533',
 };
 
-export function renderEnd(st, onRestart, peers) {
+export function renderEnd(st, onRestart, peers, opts = {}) {
   const d = st.deathInfo;
-  const peerRows = (peers || []).map(p => {
+  const peerRows = (peers || []).filter(p => p !== st).map(p => {
     const alive = p.alive;
     const age = alive ? p.age : (p.deathInfo ? p.deathInfo.age : p.age);
-    return `<div class="peer-end-row"><span>${esc(p.name)} · ${esc(p.countryName)}</span><b>${alive ? '仍在人生路上（' + age + '岁）' : age + '岁离世'}</b></div>`;
+    const btn = opts.onPeer ? `<button class="peer-live-btn" data-peer="${p.name}" title="以 TA 的视角走过 TA 的人生">体验 TA 的一生</button>` : '';
+    return `<div class="peer-end-row"><span>${esc(p.name)} · ${esc(p.countryName)}</span><b>${alive ? '仍在人生路上（' + age + '岁）' : age + '岁离世'}</b>${btn}</div>`;
   }).join('');
   const helpline = HELPLINES[st.country] || '全球求助目录 findahelpline.com';
   $app().innerHTML = `
@@ -371,10 +372,22 @@ export function renderEnd(st, onRestart, peers) {
         </div>
         <p class="end-help">这个世界真实存在。如果你或你身边的人正经历艰难：${helpline}</p>
       </div>
-      <div class="end-foot"><button class="btn-birth" id="btn-again">再次出生</button></div>
+      <div class="end-foot">
+        ${opts.isExperience ? '<button class="ghost" id="btn-back-self">← 返回自己的人生</button>' : ''}
+        <button class="btn-birth" id="btn-again">${opts.isExperience ? '替 TA 再活一次' : '再次出生'}</button>
+      </div>
     </div>
   </div>`;
   document.getElementById('btn-again').onclick = onRestart;
+  if (opts.isExperience && document.getElementById('btn-back-self')) {
+    document.getElementById('btn-back-self').onclick = opts.onBackSelf;
+  }
+  if (opts.onPeer) {
+    document.querySelectorAll('.peer-live-btn').forEach(btn => {
+      const target = (peers || []).find(p => p.name === btn.dataset.peer);
+      if (target) btn.onclick = () => opts.onPeer(target);
+    });
+  }
   document.getElementById('btn-share').onclick = async e => {
     const btn = e.currentTarget;
     btn.disabled = true;

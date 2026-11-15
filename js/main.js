@@ -5,6 +5,8 @@ import { createLifeState, advanceYear, resolveChoice } from './engine/life.js';
 import { renderHome, renderBirthCard, renderGameShell, renderEnd, updateGame, showChoice, renderFocus, showReflect, renderPeers } from './ui/render.js';
 import { applyEraTheme, resetEraTheme } from './ui/era-themes.js';
 
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
 let st = null;
 let peers = [];      // 同龄人陪跑（同秒出生的另外 4 个婴儿）
 let speed = 1;
@@ -24,6 +26,7 @@ function goBirthCard(year) {
   const rng = makeRng(randomSeed());
   const birthYear = year || new Date().getFullYear();
   applyEraTheme(birthYear);
+  selfStack.length = 0;  // 新的一局：体验栈清空
   const birth = rollBirth(rng, birthYear);
   st = createLifeState(birth);
   const no = birthCardNo(rng, st.code, birthYear);
@@ -45,7 +48,12 @@ function goGame() {
     onAuto: toggleAuto,
   });
   updateGame(st);
-  renderPeers(peers);
+  renderPeers(peers.filter(p => p !== st));
+  // 体验模式标识：顶栏 logo 位显示当前视角
+  const logo = document.querySelector('.tb-logo');
+  if (logo) logo.innerHTML = selfStack.length
+    ? `体验中 · ${esc(st.name)} 的人生`
+    : '八十亿分之一';
   startLoop();
 }
 
@@ -76,7 +84,7 @@ function doYear() {
   const r = advanceYear(st);
   // 同龄人同步推进（纯模拟：自动选第一选项、无 UI）
   for (const p of peers) {
-    if (!p.alive) continue;
+    if (!p.alive || p === st) continue;
     let guard = 0;
     while (p.alive && guard++ < 6) {
       const pr = advanceYear(p);
@@ -86,7 +94,7 @@ function doYear() {
     }
     if (p.alive === false && p.deathInfo) p.alive = false;
   }
-  renderPeers(peers);
+  renderPeers(peers.filter(p => p !== st));
   if (r.died) { onDeath(); return; }
   // 反思暂停点：5/15/30/50/70 岁（auto 模式下不暂停，仅标记）
   if (REFLECT_AGES.includes(st.age) && !st.reflectDone?.has(st.age)) {
@@ -135,7 +143,7 @@ function stepToChoice() {
     if (guard > 130 || !st.alive) { if (!st.alive) onDeath(); return; }
     const r = advanceYear(st);
     for (const p of peers) {
-      if (!p.alive) continue;
+      if (!p.alive || p === st) continue;
       let g2 = 0;
       while (p.alive && g2++ < 6) {
         const pr = advanceYear(p);
@@ -144,7 +152,7 @@ function stepToChoice() {
         break;
       }
     }
-    renderPeers(peers);
+    renderPeers(peers.filter(p => p !== st));
     if (r.died) { updateGame(st); onDeath(); return; }
     // 反思暂停点（step 与 auto 均生效）
     if (REFLECT_AGES.includes(st.age) && !st.reflectDone?.has(st.age)) {
@@ -202,7 +210,41 @@ function onDeath() {
   document.body.appendChild(veil);
   veil.addEventListener('animationend', () => veil.remove());
   setTimeout(() => veil.remove(), 2000);
-  renderEnd(st, () => goHome(), peers);
+  renderEnd(st, () => goHome(), peers, endOpts());
+}
+
+// ── 体验同一秒出生的他们（v0.9.5）──
+// 结算页点「体验 TA 的一生」：接管 peer 的完整人生状态
+// TA 已死 → 直接看 TA 的死亡纪录；TA 还活着 → 从冻结点继续交互玩到死
+const selfStack = [];   // 体验栈：支持 A 的结算 → 体验 B → B 死后结算 → 再体验 C → 逐层返回
+
+function endOpts() {
+  return {
+    isExperience: selfStack.length > 0,
+    onPeer: p => experiencePeer(p),
+    onBackSelf: exitExperience,
+  };
+}
+
+function experiencePeer(p) {
+  stopLoop();
+  selfStack.push(st);
+  st = p;
+  if (st.alive) {
+    goGame();
+  } else {
+    renderEnd(st, () => goHome(), peers, endOpts());
+  }
+}
+
+function exitExperience() {
+  stopLoop();
+  st = selfStack.pop() || st;
+  if (st.alive) {
+    goGame();
+  } else {
+    renderEnd(st, () => goHome(), peers, endOpts());
+  }
 }
 
 goHome();

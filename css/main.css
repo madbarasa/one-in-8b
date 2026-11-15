@@ -378,3 +378,21 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 .era-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .era-chip { font-size: 11px; color: var(--ink-2); background: var(--stamp-soft); border: 1px solid var(--stamp); border-radius: 999px; padding: 2px 9px 2px 4px; line-height: 1.6; }
 .era-chip b { display: inline-block; background: var(--stamp); color: var(--stamp-soft); border-radius: 999px; font-size: 10px; padding: 0 6px; margin-right: 5px; font-family: "IBM Plex Mono", monospace; }
+
+/* ── v0.9.5 体验同龄人 ── */
+.peer-end-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px dashed var(--rule); font-size: 12.5px; }
+.peer-end-row span { flex: 1; min-width: 0; }
+.peer-end-row b { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.peer-live-btn {
+  flex: none; font-size: 11px; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--accent); color: var(--accent); background: transparent;
+  transition: background .15s, color .15s;
+}
+.peer-live-btn:hover { background: var(--accent); color: var(--accent-ink); }
+.ghost {
+  display: inline-block; font-size: 14px; color: var(--ink-2);
+  padding: 11px 24px; border-radius: 4px; border: 1px solid var(--rule);
+  background: transparent; transition: border-color .15s, color .15s;
+}
+.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.end-foot .ghost { font-size: 16px; padding: 11px 34px; margin-right: 10px; }
