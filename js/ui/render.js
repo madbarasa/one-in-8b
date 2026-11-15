@@ -48,7 +48,6 @@ export function renderHome(onBirth) {
         <p class="era-note" id="era-note">默认投生此刻。拖动滑块，你可以选择出生在过去的任何一个年份——按那一年的真实统计出生、成长、老去。</p>
       </div>
       <button class="btn-birth" id="btn-birth">出　生</button>
-      <div class="hero-crowd" title="五国群像">${crowdSVG()}</div>
       <p class="home-note">复刻研究版 · 数据来自世界银行 API / UN WPP / WHO · 覆盖 217 个国家与地区 · 全球新生儿 100% 抽样空间</p>
       <div class="home-opts">
         <label class="opt-classroom"><input type="checkbox" id="opt-classroom"> 教室模式（缓和沉重主题，适合课堂）</label>
@@ -56,6 +55,7 @@ export function renderHome(onBirth) {
     </div>
     <div class="home-distro">
       <h2>如果你是此刻出生的婴儿</h2>
+      <div class="hero-crowd" title="五国群像">${crowdSVG()}</div>
       <p class="distro-sub">出生地按各国每年新生儿数量加权抽取——世界银行最新统计，覆盖 217 个国家与地区</p>
       <div class="distro-top">
       ${Object.values(COUNTRIES).filter(c => !c.generated).map(c => `
