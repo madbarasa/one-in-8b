@@ -375,9 +375,13 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
 /* ── 时代印记 ── */
 .era-band { margin: 10px 26px 0; padding: 10px 0 4px; border-top: 1px dashed var(--rule); }
 .era-head { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-2); text-align: center; margin-bottom: 8px; letter-spacing: .14em; text-transform: uppercase; }
-.era-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-.era-chip { font-size: 11px; color: var(--ink-2); background: var(--stamp-soft); border: 1px solid var(--stamp); border-radius: 999px; padding: 2px 9px 2px 4px; line-height: 1.6; }
-.era-chip b { display: inline-block; background: var(--stamp); color: var(--stamp-soft); border-radius: 999px; font-size: 10px; padding: 0 6px; margin-right: 5px; font-family: "IBM Plex Mono", monospace; }
+.era-rows { display: flex; flex-direction: column; gap: 7px; max-width: 340px; margin: 0 auto; }
+.era-row { display: flex; align-items: baseline; gap: 10px; font-size: 14px; color: var(--ink); line-height: 1.4; }
+.era-row b {
+  font-family: "Hahmlet", "Noto Serif SC", serif; font-weight: 500; font-size: 19px;
+  color: var(--accent); min-width: 2ch; text-align: right; flex: none;
+}
+.era-row span { border-bottom: 1px solid var(--rule2); padding-bottom: 2px; flex: 1; }
 
 /* ── v0.9.5 体验同龄人 ── */
 .peer-end-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px dashed var(--rule); font-size: 12.5px; }

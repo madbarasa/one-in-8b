@@ -1,7 +1,7 @@
 // 生命年轮 v0.9.0：结算页同心圆可视化
 // 中心=出生，向外一圈十年；每年一段弧，金色好年/朱红坏年/淡墨空白年
 // 重大事件（里程碑/婚姻/丧偶/迁移）在环上打点，时代事件打金点（v0.9.4），图例在下方
-import { ERA_TITLES, eraShortTitle } from '../data/events_era.js';
+import { ERA_TITLES, ERA_MINOR_IDS, eraShortTitle } from '../data/events_era.js';
 
 const C = { pos: '#E8B04B', neg: '#B3352C', base: '#d8d0bd', mark: '#1D4E5F', text: '#5a6068' };
 
@@ -38,19 +38,20 @@ export function lifeWheelSVG(st) {
     if (!cur.t || (cur.t.weight || 0) < (t.weight || 0)) cur.t = t;
     byAge.set(t.age, cur);
   }
-  // 重大事件标记：里程碑/婚姻/生育/丧偶/迁移（优先取一条）+ 时代事件（era- 前缀，金色）
+  // 重大事件标记：只认人生转折——中文叙事习惯是句首点明大事，只扫前 10 字防比喻误伤（「打印机战争」）
   const marks = [];
   for (const t of st.timeline) {
-    const big = t.milestone || /婚姻|结婚|孩子|丧|离世|移民|搬|战争|灾害/.test(t.text || '');
+    const head = (t.text || '').slice(0, 10);
+    const big = t.milestone || /婚姻|结婚|成家|丧|离世|去世|移民|移居|迁|出生|毕业|退休|灾害|地震|海啸|破产/.test(head);
     if (big && t.age > 0) marks.push(t);
   }
   const seen = new Set();
   const uniqMarks = marks.filter(t => { const k = t.age + '/' + (t.text || '').slice(0, 6); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
-  // 时代印记点（v0.9.4）：era- 事件在年轮上打金点，tooltip 显示标题
+  // 时代印记点（v0.9.5）：只打世界大事（过滤生活科技类），tooltip 显示标题
   const eraMarks = [];
   const seenEra = new Set();
   for (const t of st.timeline) {
-    if (t.id && t.id.startsWith('era-') && !seenEra.has(t.id)) {
+    if (t.id && t.id.startsWith('era-') && !ERA_MINOR_IDS.has(t.id) && ERA_TITLES[t.id] && !seenEra.has(t.id)) {
       seenEra.add(t.id);
       eraMarks.push({ age: t.age, title: (ERA_TITLES && ERA_TITLES[t.id]) || eraShortTitle(t.text) });
     }
@@ -95,7 +96,11 @@ export function lifeWheelSVG(st) {
   s += '</svg>';
 
   // 图例 + 重大事件清单
-  const legend = uniqMarks.slice(0, 5).map(t => `<div class="wheel-mark"><i>●</i>${t.age} 岁 · ${esc(t.text.slice(0, 24))}</div>`).join('');
+  const legend = uniqMarks.slice(0, 5).map(t => {
+    // 图例文案：先查事件短标题映射，再兜底截短——保持庄重
+    const short = (t.id && ERA_TITLES[t.id]) || eraShortTitle(t.text) || (t.text || '').slice(0, 16);
+    return `<div class="wheel-mark"><i>●</i>${t.age} 岁 · ${esc(short)}</div>`;
+  }).join('');
   return s + `<div class="wheel-legend">
     <div class="wheel-marks">${legend}</div>
     <div class="wheel-key"><span class="k-pos">好年</span><span class="k-neg">难年</span><span class="k-base">平静年</span></div>

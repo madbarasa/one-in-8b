@@ -4,19 +4,20 @@ import { summarize } from '../engine/life.js';
 import { avatarSVG, sceneSVG, crowdSVG, tombstoneSVG } from './pixel.js';
 import { lifeWheelSVG } from './life-wheel.js';
 import { cultureOfIso } from '../data/culture_groups.js';
-import { ERA_TITLES, eraShortTitle } from '../data/events_era.js';
+import { ERA_TITLES, ERA_MINOR_IDS, eraShortTitle } from '../data/events_era.js';
 
-// 时代印记区：结算页列出你一生穿越的大时代（v0.9.4）
+// 时代印记区：只陈列改变世界的大事（个人生活科技不算），行式时间轴（v0.9.5）
 function eraBandHtml(st) {
-  const marks = st.timeline.filter(t => t.id && t.id.startsWith('era-'));
+  // 白名单制：只有 ERA_TITLES 有映射且非 minor 的事件才算时代印记——common2 的日常科技条目（VR/垃圾分类/AI工具等无映射）彻底出局
+  const marks = st.timeline.filter(t => t.id && t.id.startsWith('era-') && !ERA_MINOR_IDS.has(t.id) && ERA_TITLES[t.id]);
   if (!marks.length) return '';
-  const chips = marks.map(t => {
+  const rows = marks.map(t => {
     const title = ERA_TITLES[t.id] || eraShortTitle(t.text);
-    return `<span class="era-chip"><b>${t.age}</b>${esc(title)}</span>`;
+    return `<div class="era-row"><b>${t.age}</b><span>岁 · ${esc(title)}</span></div>`;
   }).join('');
   return `<div class="era-band">
     <div class="era-head">⏳ 你的一生穿越了 ${marks.length} 个时代印记</div>
-    <div class="era-chips">${chips}</div>
+    <div class="era-rows">${rows}</div>
   </div>`;
 }
 

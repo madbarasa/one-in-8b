@@ -720,12 +720,20 @@ export const ERA_TITLES = {
   'era-kr-democracy': '六月民主运动', 'era-sg-1965': '新加坡建国', 'era-vn-doi-moi': '越南革新开放',
   'era-gaokao77': '恢复高考', 'era-ch-reform-choice': '改革抉择',
 };
-// 兜底：从文案里截短（结算页对无映射的 era 事件取 text 前 18 字）
+// 时代印记白名单外的生活科技类——不算「穿越的时代」（个人新体验≠世界大事）
+export const ERA_MINOR_IDS = new Set([
+  'era-vr', 'era-online-shop', 'era2-online-shopping', 'era-first-smartphone', 'era-phone',
+  'era-first-email', 'era-ev-bike', 'era-social-media', 'era-social-video', 'era-esports',
+  'era-5g', 'era-share-bike', 'era-streaming', 'era-cashless', 'era-mobile-phone',
+  'era-mobile-pay', 'era-internet', 'era-online-era', 'era-supermarket', 'era-worldcup-tv',
+]);
+// 兜底：从文案里截短（结算页对无映射的 era 事件取短句）
 export const eraShortTitle = (t) => {
   if (!t) return '';
   const s = String(t);
-  const cut = s.split(/[。：:——]/)[0];
-  return cut.length > 20 ? cut.slice(0, 19) + '…' : cut;
+  let cut = s.split(/[。：:——「」]/)[0] || s.slice(0, 12);
+  if (cut.length > 12) cut = cut.slice(0, 11) + '…';
+  return cut;
 };
 
 
