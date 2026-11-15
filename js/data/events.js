@@ -286,7 +286,7 @@ add({
     { label: '买一注碰碰运气', outcome: '刮开涂层——谢谢惠顾。你笑了笑，把这当成了零头的娱乐。', effect: { money: -2, hap: 1 } },
     { label: '省下这笔钱', outcome: '你把两块钱放回了口袋。', effect: {} },
   ],
-  once: false, weight: 1,
+  once: true, weight: 1,
 });
 add({
   id: 'adult-promotion', type: 'log', minAge: 26, maxAge: 45, weight: 10,
