@@ -87,9 +87,17 @@ export function advanceYear(st) {
   // 抉择事件：同一年只触发一个——按 weight 随机抽取（v0.9.2 修复：原 choices[0] 永取数组第一条，
   // 导致 once:false 且无 cond 的事件（彩票摊）18-70 岁年年必中）
   if (choices.length > 0) {
-    const ev = choices.length === 1 ? choices[0] : choices[st.rng.weighted(choices.map(c => c.weight || 1))];
-    st.firedEvents.add(ev.id);
-    markCooldown(st, ev);
+    // 文化圈抉择同骨架多样性保护（v0.9.5）：8 岁内同 kind 降权 90%，避免单局同类堆积
+    st.kindCooldown = st.kindCooldown || {};
+    const weights = choices.map(c => {
+      if (!c._kind) return c.weight || 1;
+      const last = st.kindCooldown[c._kind] ?? -99;
+      return (st.age - last < 8) ? (c.weight || 1) * 0.1 : (c.weight || 1);
+    });
+    const picked = choices[st.rng.weighted(weights)];
+    if (picked._kind) st.kindCooldown[picked._kind] = st.age;
+    st.firedEvents.add(picked.id);
+    markCooldown(st, picked);
     // 抉择年份同样抽取 0-2 条日常事件——不再让抉择饿死人生烟火（v0.7.0 修复）
     const nLog = st.rng.weighted([3, 4, 3]);
     for (const ev2 of pickDistinct(logs, nLog, st.rng)) {
@@ -97,7 +105,7 @@ export function advanceYear(st) {
       markCooldown(st, ev2);
       applyLogEvent(st, ev2);
     }
-    return { choice: ev };
+    return { choice: picked };
   }
 
   // 概率事件：抽 0-2 条

@@ -39,6 +39,30 @@ import { PHASE_EVENTS } from './events_phase.js';
 import { CUL_MORE_A } from './events_cul_more_a.js';
 import { CUL_MORE_B } from './events_cul_more_b.js';
 import { CHOICE_CUL } from './events_choice_cul.js';
+import { CHOICE_CUL_FULL } from './cul-choice-engine.js';
+import './cul-sinic.js';
+import './cul-sas-indic.js';
+import './cul-west.js';
+import './cul-hispanic.js';
+import './cul-brazil.js';
+import './cul-seamar.js';
+import './cul-seamain.js';
+import './cul-arab.js';
+import './cul-sasislam.js';
+import './cul-batch-1.js';
+import './cul-batch-2.js';
+import './cul-batch-3.js';
+import './cul-batch-4.js';
+import './cul-batch-5.js';
+import './cul-batch-6.js';
+import './cul-batch-7.js';
+import './cul-batch-8.js';
+import './cul-batch-9.js';
+import './cul-batch-10.js';
+import './cul-batch-11.js';
+import './cul-batch-12.js';
+import './cul-batch-13.js';
+import './cul-batch-14.js';
 
 // 状态：hp 健康 / hap 幸福 / know 知识 / rel 人际关系，money 单位 PPP 国际元
 const E = [];
@@ -692,6 +716,7 @@ E.push(...PHASE_EVENTS);
 E.push(...CUL_MORE_A);
 E.push(...CUL_MORE_B);
 E.push(...CHOICE_CUL);
+E.push(...CHOICE_CUL_FULL);
 
 // id 去重：保留先注册的（v0.7 优先），后注册的同 id 丢弃（v0.9.3）
 const seenIds = new Set();
