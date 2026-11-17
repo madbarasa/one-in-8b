@@ -104,7 +104,7 @@ add({
   id: 'toddler-explore', type: 'choice', minAge: 2, maxAge: 2,
   title: '两岁，陌生的外面世界',
   text: '{name} 现在已经走得很稳了。院子外面的世界充满陌生的声音和气味，你扒着门框往外看。',
-  source: '综合双胞胎研究，人格差异约 40% 可由遗传解释（Vukasović & Bratko 2015）',
+  source: '综合双胞胎研究，人格差异约 40% 可由遗传解释（克罗地亚双胞胎研究，2015）',
   options: [
     { label: '盯着泥土和小石子看好一阵子', outcome: '你蹲在门槛边研究了半个下午的蚂蚁搬家。', effect: { know: 3, hap: 1 } },
     { label: '使尽全力跑出去', outcome: '你撒腿冲进院子，摔了个屁股墩，笑得咯咯响。', effect: { hp: 2, hap: 2 } },

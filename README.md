@@ -6,8 +6,6 @@
 
 **纯前端的「人生概率模拟器」**：每次开局，你被随机投生到 80 亿人中的某一个位置，然后带着这个出身走完一生。
 
-[![在线体验](https://img.shields.io/badge/在线体验- GitHub%20Pages-1D4E5F?style=for-the-badge&logo=github)](https://madbarasa.github.io/one-in-8b/)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Version](https://img.shields.io/badge/version-v0.9.5-blue)
 ![Events](https://img.shields.io/badge/事件库-3079%20条-2EA043)
@@ -21,7 +19,9 @@
 
 无需注册，直接开玩。
 
-<img src="assets/art-reference/share-card-template.png" alt="人生海报" width="420">
+| 首页 · 年代世界 | 游戏中 · 文化圈抉择 | 结算页 · 生命年轮 |
+|:---:|:---:|:---:|
+| ![首页](assets/screenshots/home.png) | ![游戏中](assets/screenshots/game.png) | ![结算页](assets/screenshots/end.png) |
 
 </div>
 
