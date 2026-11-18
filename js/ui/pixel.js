@@ -86,6 +86,84 @@ const POSE = {
   old:   { headR: 126, headY: 55,  shoulder: 205, waist: 160, hipY: 435, legLen: 290, hunch: 90,  pose: 'cane'  },
 };
 
+// 公共人形体（脚底 y=0 向上，820 坐标系）——avatarSVG（卡版）与 figureSVG（落地版）共用
+export function personParams(country, gender, stage, group = null, culture = null) {
+  const pal = paletteFor(country, group);
+  const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
+  const alt = pal.clothAlt;
+  const isOld = stage === 'old';
+  const isMid = stage === 'mid';
+  const hair = isOld ? HAIR_OLD : isMid ? (pal.hair || HAIR) : (pal.hair || HAIR);
+  const skin = pal.skin || SKIN;
+  const isFemale = gender === 'female';
+  if (stage === 'baby') return { baby: true, pal, cloth, alt, skin, hair };
+  return { pal, cloth, alt, hair, skin, isFemale, gender, isOld, isMid, stage, country, culture };
+}
+
+function _bodyPaths(o) {
+  const { cloth, alt, hair, skin, isFemale, gender, isOld, stage, country, culture, pal } = o;
+  const p = POSE[stage] || POSE.adult;
+  const legTop = p.hipY;
+  const footY = legTop + p.legLen;
+  const shoulderY = p.headY + p.headR * 2 + 20 + p.hunch * 0.4;
+  const halfSh = p.shoulder / 2;
+  const halfWa = p.waist / 2;
+  const hx = p.hunch ? p.hunch * 0.9 : 0;
+  const hr = p.headR;
+  const hcy = p.headY + p.headR;
+  const neckY = p.headY + p.headR * 2 + 6;
+  const head = `<circle cx="${hx}" cy="${hcy}" r="${hr}" fill="${skin}"/>`;
+  let hairP;
+  if (isFemale && stage !== 'kid') {
+    hairP = `<path d="M${hx - hr} ${hcy - 2} Q${hx - hr} ${hcy - hr - 10} ${hx} ${hcy - hr - 10} Q${hx + hr} ${hcy - hr - 10} ${hx + hr} ${hcy - 2} Q${hx + hr * 0.55} ${hcy - hr * 0.42} ${hx} ${hcy - hr * 0.38} Q${hx - hr * 0.55} ${hcy - hr * 0.42} ${hx - hr} ${hcy - 2} Z" fill="${hair}"/>`
+      + `<path d="M${hx - hr - 4} ${hcy - hr * 0.3} Q${hx - hr - 12} ${hcy + hr * 0.55} ${hx - hr + 8} ${hcy + hr * 0.82} L${hx - hr + 34} ${hcy + hr * 0.6} Q${hx - hr + 26} ${hcy} ${hx - hr + 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`
+      + `<path d="M${hx + hr + 4} ${hcy - hr * 0.3} Q${hx + hr + 12} ${hcy + hr * 0.55} ${hx + hr - 8} ${hcy + hr * 0.82} L${hx + hr - 34} ${hcy + hr * 0.6} Q${hx + hr - 26} ${hcy} ${hx + hr - 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`;
+  } else {
+    hairP = `<path d="M${hx - hr} ${hcy - 6} Q${hx - hr} ${hcy - hr - 8} ${hx} ${hcy - hr - 8} Q${hx + hr} ${hcy - hr - 8} ${hx + hr} ${hcy - 6} Q${hx + hr * 0.5} ${hcy - hr * 0.35} ${hx} ${hcy - hr * 0.3} Q${hx - hr * 0.5} ${hcy - hr * 0.35} ${hx - hr} ${hcy - 6} Z" fill="${hair}"/>`;
+  }
+  let bodyP;
+  let skirtEdge = '';
+  if (isFemale && stage !== 'kid' && stage !== 'teen') {
+    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${p.waist * 0.78} ${legTop + 60} Q0 ${legTop + 120} ${-p.waist * 0.78} ${legTop + 60} Z`;
+    skirtEdge = `<path d="M${-p.waist * 0.74} ${legTop + 56} Q0 ${legTop + 114} ${p.waist * 0.74} ${legTop + 56}" stroke="${alt}" stroke-width="20" fill="none" stroke-linecap="round" opacity=".8"/>`;
+  } else {
+    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${halfWa} ${legTop} L${-halfWa} ${legTop} Z`;
+  }
+  const legsP = p.pose === 'cane'
+    ? `M${-halfWa} ${legTop} L${halfWa} ${legTop} L${halfWa * 0.5} ${footY} L${-halfWa * 0.5} ${footY} Z`
+    : `M${-halfWa + 8} ${legTop} L${-14} ${legTop} L${-22} ${footY} L${-halfWa - 26} ${footY} Z M${14} ${legTop} L${halfWa - 8} ${legTop} L${halfWa + 26} ${footY} L${22} ${footY} Z`;
+  const shoes = `<ellipse cx="${-halfWa - 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/><ellipse cx="${halfWa + 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/>`;
+  const armL = `M${-halfSh - 6} ${shoulderY + 16} Q${-halfSh - 30} ${shoulderY + 150} ${-halfSh - 12} ${legTop - 20} Q${-halfSh + 14} ${legTop - 14} ${-halfSh + 4} ${shoulderY + 60} Z`;
+  const armR = `M${halfSh + 6} ${shoulderY + 16} Q${halfSh + 30} ${shoulderY + 150} ${halfSh + 12} ${legTop - 20} Q${halfSh - 14} ${legTop - 14} ${halfSh - 4} ${shoulderY + 60} Z`;
+  const cane = p.pose === 'cane' ? `<path d="M${halfSh + 70} ${footY} L${halfSh + 70} ${shoulderY - 30} Q${halfSh + 70} ${shoulderY - 78} ${halfSh + 20} ${shoulderY - 72}" stroke="#8a6a4a" stroke-width="16" fill="none" stroke-linecap="round"/>` : '';
+  const eyes = `<ellipse cx="${hx - p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/><ellipse cx="${hx + p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/>`;
+  const wrinkle = isOld ? `<path d="M${hx - p.headR * 0.5} ${hcy + p.headR * 0.42} Q${hx} ${hcy + p.headR * 0.52} ${hx + p.headR * 0.5} ${hcy + p.headR * 0.42}" stroke="${INK}" stroke-opacity=".3" stroke-width="7" fill="none" stroke-linecap="round"/>` : '';
+  const K = 51.25;
+  const oldHeadY = 1 + (isOld ? 1 : 0), oldBodyY = oldHeadY + 7, oldBodyH = stage === 'kid' ? 4 : 7, oldLegY = oldBodyY + oldBodyH;
+  const R = (x, y, w, h, fill) => `<rect x="${(x - 8) * K * 0.62 + hx}" y="${(y - 1) * K * 0.62 + shoulderY * 0.55}" width="${w * K * 0.62}" height="${h * K * 0.62}" fill="${fill}" rx="4"/>`;
+  const deco = attireDeco(culture, gender, stage, { R, headY: oldHeadY, bodyY: oldBodyY, bodyH: oldBodyH, legY: oldLegY, pal, cloth, alt });
+  const dress = isFemale ? (o.altCloth || alt) : cloth;
+  return `${cane}<path d="${legsP}" fill="${isOld ? cloth : '#3A4148'}"/>${shoes}<path d="${armL}" fill="${dress}"/><path d="${armR}" fill="${dress}"/><path d="${bodyP}" fill="${dress}"/>${skirtEdge}<path d="M${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} L${halfSh * 0.3} ${neckY - 4} L${-halfSh * 0.3} ${neckY - 4} Z" fill="${alt}" opacity=".85"/>${head}${hairP}${eyes}${wrinkle}${deco}`;
+}
+
+// 落地版人形（家庭图/群像用）：无卡底，脚底锚定 (x, groundY)，身高 heightPx
+export function figureSVG(country, gender, stage, x, groundY, heightPx, group = null, culture = null) {
+  const o = personParams(country, gender, stage, group, culture);
+  if (o.baby) {
+    const { pal, cloth, alt, skin, hair } = o;
+    return `<g transform="translate(${x} ${groundY}) scale(${(heightPx / 350).toFixed(3)}) translate(0 -180)">
+      <path d="M-260 60 Q-280 -40 -200 -110 Q-120 -170 0 -170 Q120 -170 200 -110 Q280 -40 260 60 Q240 150 120 180 L-120 180 Q-240 150 -260 60 Z" fill="${alt}"/>
+      <path d="M-130 0 Q-145 -60 -90 -100 Q-30 -132 0 -130 Q40 -128 80 -100 Q120 -70 110 -20 Q100 20 50 34 L-40 34 Q-100 26 -130 0 Z" fill="${skin}"/>
+      <ellipse cx="-40" cy="-30" rx="13" ry="15" fill="${INK}"/><ellipse cx="40" cy="-30" rx="13" ry="15" fill="${INK}"/>
+      <circle cx="-36" cy="-35" r="4.5" fill="#FFF"/><circle cx="44" cy="-35" r="4.5" fill="#FFF"/>
+      <ellipse cx="-72" cy="-2" rx="17" ry="11" fill="#E0705C" opacity=".8"/><ellipse cx="72" cy="-2" rx="17" ry="11" fill="#E0705C" opacity=".8"/>
+      <path d="M-16 16 Q0 30 16 16" stroke="${INK}" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M-215 -75 Q-100 -128 0 -130 Q100 -128 215 -75" stroke="${cloth}" stroke-width="38" fill="none" stroke-linecap="round" opacity=".92"/>
+    </g>`;
+  }
+  return `<g transform="translate(${x} ${groundY}) scale(${(heightPx / 760).toFixed(3)}) translate(0 -750)">${_bodyPaths(o)}</g>`;
+}
+
 export function avatarSVG(country, gender, stage, size = 16, group = null, culture = null) {
   const pal = paletteFor(country, group);
   const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
@@ -114,84 +192,22 @@ export function avatarSVG(country, gender, stage, size = 16, group = null, cultu
         <path d="M-16 -104 Q-6 -122 6 -118 Q18 -114 22 -100" stroke="${hair}" stroke-width="14" fill="none" stroke-linecap="round"/>
         <path d="M-215 -75 Q-100 -128 0 -130 Q100 -128 215 -75" stroke="${cloth}" stroke-width="38" fill="none" stroke-linecap="round" opacity=".92"/>
         <path d="M-60 120 L0 60 L60 120" stroke="${WINE}" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <ellipse cx="-70" cy="6" rx="16" ry="10" fill="#F0A08A" opacity=".55"/>
-        <ellipse cx="70" cy="6" rx="16" ry="10" fill="#F0A08A" opacity=".55"/>
         <path d="M-230 20 Q-120 90 0 92 Q120 90 230 20" stroke="${INK}" stroke-opacity=".14" stroke-width="9" fill="none" stroke-linecap="round"/>
         <path d="M-110 -92 Q0 -128 110 -92" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="12" fill="none" stroke-linecap="round"/>
       </g>
     </svg>`;
   }
 
-  const p = POSE[stage] || POSE.adult;
-  const legTop = p.hipY;
-  const footY = legTop + p.legLen;
-  const shoulderY = p.headY + p.headR * 2 + 20 + p.hunch * 0.4;
-  const halfSh = p.shoulder / 2;
-  const halfWa = p.waist / 2;
-
-  // 主人形 path：头（arc 圆）+ 颈肩 + 腰臀 + 双腿（一体贝塞尔，footY 为 0 基线倒画）
-  // 头（含 hunch 前倾偏移）
-  const hx = p.hunch ? p.hunch * 0.9 : 0;
-  const head = `<circle cx="${hx}" cy="${p.headY + p.headR}" r="${p.headR}" fill="${skin}"/>`;
-
-  // 发型：男短寸 / 女披肩 / 老年灰白全覆盖
-  let hairP;
-  const hr = p.headR;
-  const hcy = p.headY + p.headR;
-  if (isFemale && stage !== 'kid') {
-    // 女性长发：顶部发帘 + 两侧垂发条（不越过脸颊）
-    hairP = `<path d="M${hx - hr} ${hcy - 2} Q${hx - hr} ${hcy - hr - 10} ${hx} ${hcy - hr - 10} Q${hx + hr} ${hcy - hr - 10} ${hx + hr} ${hcy - 2} Q${hx + hr * 0.55} ${hcy - hr * 0.42} ${hx} ${hcy - hr * 0.38} Q${hx - hr * 0.55} ${hcy - hr * 0.42} ${hx - hr} ${hcy - 2} Z" fill="${hair}"/>`
-      + `<path d="M${hx - hr - 4} ${hcy - hr * 0.3} Q${hx - hr - 12} ${hcy + hr * 0.55} ${hx - hr + 8} ${hcy + hr * 0.82} L${hx - hr + 34} ${hcy + hr * 0.6} Q${hx - hr + 26} ${hcy} ${hx - hr + 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`
-      + `<path d="M${hx + hr + 4} ${hcy - hr * 0.3} Q${hx + hr + 12} ${hcy + hr * 0.55} ${hx + hr - 8} ${hcy + hr * 0.82} L${hx + hr - 34} ${hcy + hr * 0.6} Q${hx + hr - 26} ${hcy} ${hx + hr - 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`;
-  } else {
-    hairP = `<path d="M${hx - hr} ${hcy - 6} Q${hx - hr} ${hcy - hr - 8} ${hx} ${hcy - hr - 8} Q${hx + hr} ${hcy - hr - 8} ${hx + hr} ${hcy - 6} Q${hx + hr * 0.5} ${hcy - hr * 0.35} ${hx} ${hcy - hr * 0.3} Q${hx - hr * 0.5} ${hcy - hr * 0.35} ${hx - hr} ${hcy - 6} Z" fill="${hair}"/>`;
-  }
-
-  // 躯干 + 腿（衣服主色；女性裙形下摆展开）
-  const neckY = p.headY + p.headR * 2 + 6;
-  let bodyP;
-  if (isFemale && stage !== 'kid' && stage !== 'teen') {
-    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${p.waist * 0.78} ${legTop + 60} Q0 ${legTop + 120} ${-p.waist * 0.78} ${legTop + 60} Z`;
-  } else {
-    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${halfWa} ${legTop} L${-halfWa} ${legTop} Z`;
-  }
-  // 双腿（裤色；old 裙袍遮腿）
-  const legsP = p.pose === 'cane'
-    ? `M${-halfWa} ${legTop} L${halfWa} ${legTop} L${halfWa * 0.5} ${footY} L${-halfWa * 0.5} ${footY} Z`
-    : `M${-halfWa + 8} ${legTop} L${-14} ${legTop} L${-22} ${footY} L${-halfWa - 26} ${footY} Z M${14} ${legTop} L${halfWa - 8} ${legTop} L${halfWa + 26} ${footY} L${22} ${footY} Z`;
-  // 鞋（墨色圆头）
-  const shoes = `<ellipse cx="${-halfWa - 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/><ellipse cx="${halfWa + 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/>`;
-  // 手臂：两侧垂臂（skin 袖 cloth）
-  const armL = `M${-halfSh - 6} ${shoulderY + 16} Q${-halfSh - 30} ${shoulderY + 150} ${-halfSh - 12} ${legTop - 20} Q${-halfSh + 14} ${legTop - 14} ${-halfSh + 4} ${shoulderY + 60} Z`;
-  const armR = `M${halfSh + 6} ${shoulderY + 16} Q${halfSh + 30} ${shoulderY + 150} ${halfSh + 12} ${legTop - 20} Q${halfSh - 14} ${legTop - 14} ${halfSh - 4} ${shoulderY + 60} Z`;
-  // 拐杖（old）
-  const cane = p.pose === 'cane' ? `<path d="M${halfSh + 70} ${footY} L${halfSh + 70} ${shoulderY - 30} Q${halfSh + 70} ${shoulderY - 78} ${halfSh + 20} ${shoulderY - 72}" stroke="#8a6a4a" stroke-width="16" fill="none" stroke-linecap="round"/>` : '';
-  // 眼睛 + 驼背线
-  const eyes = `<ellipse cx="${hx - p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/><ellipse cx="${hx + p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/>`;
-  const wrinkle = isOld ? `<path d="M${hx - p.headR * 0.5} ${hcy + p.headR * 0.42} Q${hx} ${hcy + p.headR * 0.52} ${hx + p.headR * 0.5} ${hcy + p.headR * 0.42}" stroke="${INK}" stroke-opacity=".3" stroke-width="7" fill="none" stroke-linecap="round"/>` : '';
-
-  // 人形整体：脚底基线 y=820 卡内缩进
-  // 文化圈装饰桥：旧 16 系 R(x,y,w,h) → 820 系（×51.25，映射到人形区域）
-  const K = 51.25;
-  const oldHeadY = 1 + (isOld ? 1 : 0), oldBodyY = oldHeadY + 7, oldBodyH = stage === 'kid' ? 4 : 7, oldLegY = oldBodyY + oldBodyH;
-  const R = (x, y, w, h, fill) => `<rect x="${(x - 8) * K * 0.62 + hx}" y="${(y - 1) * K * 0.62 + shoulderY * 0.55}" width="${w * K * 0.62}" height="${h * K * 0.62}" fill="${fill}" rx="4"/>`;
-  const deco = attireDeco(culture, gender, stage, { R, headY: oldHeadY, bodyY: oldBodyY, bodyH: oldBodyH, legY: oldLegY, pal, cloth, alt });
+  const body = _bodyPaths({ pal, cloth, alt, hair, skin, isFemale, gender, isOld, isMid, stage, country: null, culture });
 
   return `<svg viewBox="0 0 820 820" width="${size}" height="${size}">
     <rect x="14" y="14" width="792" height="792" rx="179" fill="${CARD_BG}" stroke="${INK}" stroke-opacity=".22" stroke-width="8"/>
     <g transform="translate(410 62) scale(0.9)">
-      ${cane}
-      <path d="${legsP}" fill="${isOld ? cloth : '#3A4148'}"/>
-      ${shoes}
-      <path d="${armL}" fill="${cloth}"/>
-      <path d="${armR}" fill="${cloth}"/>
-      <path d="${bodyP}" fill="${cloth}"/>
-      <path d="M${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} L${halfSh * 0.3} ${neckY - 4} L${-halfSh * 0.3} ${neckY - 4} Z" fill="${alt}" opacity=".85"/>
-      ${head}${hairP}${eyes}${wrinkle}
-      ${deco}
+      ${body}
     </g>
   </svg>`;
 }
+
 
 // ── 文化圈服饰装饰 v0.9.2：22 圈传统元素进头像（元素点缀，不做全身戏服）──
 // 每圈 male/female 装饰函数：入参 ctx = { R, headY, bodyY, bodyH, pal, cloth, alt, kid }
@@ -304,98 +320,98 @@ function attireDeco(culture, gender, stage, ctx) {
 
 // ── 场景生成器 ──
 // 维度：国家 × 城乡 × 人生阶段（天色） × 家庭在场（配偶/子女）
+// ─────────────────────────────────────────────────────────────
+// 家庭图 v0.9.6：精绘场景（对齐原版插画风）
+// 渐变天空（四时段）+ 椭圆云团 + 曲线天际线 + 精绘民居 + 贝塞尔家庭人物组
+// ─────────────────────────────────────────────────────────────
 export function sceneSVG(st) {
   const pal = paletteFor(st.country, st.group);
   const urban = st.region === '城市';
   const age = st.age;
-  // 天色：童年晨光 → 成年正午 → 晚年黄昏（80+ 夜幕）
-  const sky = age < 13 ? pal.skyDay : age < 60 ? pal.skyNoon : age < 80 ? pal.skyDusk : pal.skyEve;
-  const sunY = age < 13 ? 30 : age < 60 ? 14 : age < 80 ? 44 : 60;
-  const sunColor = age >= 60 && age < 80 ? '#e87840' : age >= 80 ? '#c8c8d8' : '#f0e0a0';
-  const R = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
-
   const stage = age < 3 ? 'baby' : age < 13 ? 'kid' : age < 18 ? 'teen' : age < 60 ? 'adult' : 'old';
+  const phase = age < 13 ? 'morn' : age < 60 ? 'noon' : age < 80 ? 'dusk' : 'night';
+  const groundY = 176;
 
-  // ── 远景（国别剪影）──
+  // 天空：四时段渐变
+  const SKY = {
+    morn: ['#F5E9C8', pal.skyDay],
+    noon: ['#E8F0F4', pal.skyNoon],
+    dusk: ['#F0C890', pal.skyDusk],
+    night: ['#2A3048', pal.skyEve],
+  }[phase];
+  const sunY = phase === 'morn' ? 42 : phase === 'noon' ? 18 : phase === 'dusk' ? 48 : 58;
+  const sunColor = phase === 'dusk' ? '#E87840' : phase === 'night' ? '#E8E8F0' : '#F5E5A8';
+  const sunR = phase === 'night' ? 10 : 15;
+  const sunGlow = phase === 'dusk' ? '#F5A868' : phase === 'night' ? '#B8C8E8' : '#F8F0C0';
+
+  // 民居色
+  const hw = urban ? '#D8D0C0' : pal.house;
+  const roofC = pal.roof;
+
+  // 曲线天际线（城市）或远山（乡村）
   let bg = '';
   if (urban) {
-    if (st.country === 'usa') {
-      bg = R(20, 40, 18, 100, '#7890a8') + R(24, 24, 10, 16, '#7890a8') + R(56, 66, 22, 74, '#8898a8') + R(60, 56, 4, 10, '#8898a8')
-        + R(96, 52, 16, 88, '#7890a8') + R(100, 40, 8, 12, '#a8b8c8');
-    } else if (st.country === 'india') {
-      bg = R(16, 70, 14, 70, '#b09070') + R(34, 80, 12, 60, '#c0a080') + R(50, 62, 16, 78, '#b09070')
-        + R(56, 54, 4, 8, '#6a5a4a') + R(76, 84, 14, 56, '#c0a080') + R(94, 72, 18, 68, '#b09070');
-    } else if (st.country === 'indonesia') {
-      bg = R(18, 82, 12, 58, '#a08860') + R(40, 90, 14, 50, '#a08860') + R(70, 78, 12, 62, '#a08860')
-        + R(30, 60, 24, 14, '#7a9a8a') + R(34, 54, 16, 6, '#8aaaa0'); // 高脚屋群+蕉叶
-    } else if (st.country === 'pakistan') {
-      bg = R(20, 60, 12, 80, '#c0a880') + R(26, 44, 4, 16, '#1a7858') + R(48, 78, 18, 62, '#c8b088')
-        + R(54, 56, 4, 22, '#1a7858') + R(86, 70, 16, 70, '#c0a880') + R(92, 50, 4, 20, '#1a7858'); // 楼+宣礼塔
-    } else { // china
-      bg = R(16, 46, 16, 94, '#8aa0b8') + R(22, 36, 4, 10, '#8aa0b8') + R(44, 60, 14, 80, '#7a90a8')
-        + R(66, 52, 18, 88, '#8aa0b8') + R(70, 40, 10, 12, '#9ab0c0') + R(48, 66, 4, 6, pal.accent) + R(72, 60, 4, 6, pal.accent);
-    }
+    bg = `<path d="M0 150 L0 96 L34 96 L34 76 L64 76 L64 108 L96 108 L96 58 L112 58 L112 44 L128 44 L128 108 L160 108 L160 86 L190 86 L190 112 L224 112 L224 70 L252 70 L252 90 L286 90 L286 104 L320 104 L320 150 Z" fill="${phase === 'night' ? '#1A2036' : '#9AA8B4'}" opacity=".8"/>`
+      + `<path d="M0 150 L0 120 L28 120 L28 100 L52 100 L52 124 L84 124 L84 104 L108 104 L108 126 L140 126 L140 98 L170 98 L170 122 L200 122 L200 106 L230 106 L230 128 L262 128 L262 110 L292 110 L292 124 L320 124 L320 150 Z" fill="${phase === 'night' ? '#141828' : '#B0BCC4'}" opacity=".9"/>`
+      + [40, 58, 76, 108, 124, 170, 200, 236, 270].map(x => `<rect x="${x}" y="${x % 40 < 20 ? 108 : 120}" width="4" height="6" fill="${phase === 'night' ? '#F0D878' : '#F8E8A8'}" opacity="${phase === 'night' ? .9 : .7}" rx="1"/>`).join('');
   } else {
-    if (st.country === 'usa') {
-      bg = R(240, 96, 40, 26, '#b83838') + R(246, 84, 28, 12, '#8a2a2a') + R(28, 96, 16, 44, '#c8a878'); // 谷仓+房
-    } else if (st.country === 'indonesia') {
-      bg = R(20, 40, 60, 60, '#6a8a7a') + R(80, 60, 50, 40, '#7a9a8a') + R(44, 52, 10, 8, '#d8d8e8'); // 火山+雪线
-    } else if (st.country === 'india') {
-      bg = R(24, 84, 8, 46, '#6a5236') + R(20, 72, 16, 12, '#6f9a54') + R(60, 90, 8, 40, '#6a5236') + R(56, 78, 16, 12, '#6f9a54'); // 棕榈
-    } else if (st.country === 'pakistan') {
-      bg = R(30, 90, 12, 40, '#8a6a4a') + R(26, 80, 20, 10, '#98a860') + R(80, 96, 60, 34, '#c0a060'); // 孤树+土田
-    } else { // china
-      bg = R(10, 60, 44, 30, '#6a8a9a') + R(54, 76, 30, 14, '#7a9aaa') + R(110, 66, 36, 24, '#6a8a9a'); // 远山
-    }
+    bg = `<path d="M0 150 L0 110 Q60 68 130 100 Q200 130 250 92 Q290 66 320 88 L320 150 Z" fill="${phase === 'night' ? '#1A2434' : '#A8BCA0'}" opacity=".55"/>`
+      + `<path d="M0 150 L0 128 Q80 96 160 122 Q240 146 320 116 L320 150 Z" fill="${phase === 'night' ? '#141C28' : '#8CA884'}" opacity=".6"/>`
+      + [46, 132, 208, 268].map(x => `<path d="M${x} 118 Q${x + 6} 96 ${x + 14} 118" stroke="${phase === 'night' ? '#22283A' : '#6E8A64'}" stroke-width="7" fill="none" stroke-linecap="round"/>`).join('');
   }
 
-  // ── 家（国别民居）──
-  let home = '';
-  const hx = 236, hy = 118;
-  if (st.country === 'indonesia') {
-    home = R(hx, hy + 10, 56, 34, pal.house) + R(hx - 4, hy + 6, 64, 6, pal.roof)
-      + R(hx + 4, hy + 30, 6, 14, '#6a5236') + R(hx + 46, hy + 30, 6, 14, '#6a5236'); // 高脚屋
-  } else if (st.country === 'usa') {
-    home = R(hx, hy + 8, 56, 36, pal.house) + R(hx - 6, hy, 68, 10, pal.roof)
-      + R(hx + 8, hy + 16, 10, 10, pal.accent) + R(hx + 36, hy + 20, 14, 24, '#585860'); // 坡顶+门廊
-  } else if (st.country === 'india' || st.country === 'pakistan') {
-    home = R(hx, hy + 6, 56, 38, pal.house) + R(hx - 4, hy, 64, 8, pal.roof)
-      + R(hx + 22, hy - 8, 4, 8, pal.accent) + R(hx + 28, hy - 14, 8, 14, pal.roof); // 平顶+水塔/塔饰
-  } else {
-    home = R(hx, hy + 6, 56, 38, pal.house) + R(hx - 4, hy, 64, 10, pal.roof)
-      + R(hx + 24, hy + 24, 12, 20, '#5a4632') + R(hx + 10, hy + 14, 8, 8, '#e8d9a0') + R(hx + 40, hy + 14, 8, 8, '#e8d9a0')
-      + (st.country === 'china' ? R(hx + 18, hy - 6, 4, 6, pal.accent) : ''); // 灯笼点缀
-  }
+  // 民居：曲线屋顶 + 门 + 窗 + 描边
+  const homeX = 48, homeY = 58;
+  const home = `
+    <path d="M${homeX} 150 L${homeX} ${homeY + 8} L${homeX + 26} ${homeY - 16} Q${homeX + 44} ${homeY - 26} ${homeX + 62} ${homeY - 14} L${homeX + 104} ${homeY + 8} L${homeX + 104} 150 Z" fill="${hw}" stroke="#5A4A38" stroke-width="2"/>
+    <path d="M${homeX - 6} ${homeY + 10} L${homeX + 26} ${homeY - 14} Q${homeX + 44} ${homeY - 24} ${homeX + 62} ${homeY - 12} L${homeX + 110} ${homeY + 10} L${homeX + 110} ${homeY + 16} L${homeX - 6} ${homeY + 18} Z" fill="${roofC}" stroke="#4A3428" stroke-width="2"/>
+    <rect x="${homeX + 42}" y="${homeY + 30}" width="22" height="40" rx="2" fill="#4A3020" stroke="#2A1A10" stroke-width="2"/>
+    <circle cx="${homeX + 58}" cy="${homeY + 48}" r="2.2" fill="${pal.accent}"/>
+    <rect x="${homeX + 12}" y="${homeY + 32}" width="15" height="15" rx="2" fill="${phase === 'night' ? '#F0D878' : '#C8DCE4'}" stroke="#5A4A38" stroke-width="1.5"/>
+    <rect x="${homeX + 76}" y="${homeY + 32}" width="15" height="15" rx="2" fill="${phase === 'night' ? '#F0D878' : '#C8DCE4'}" stroke="#5A4A38" stroke-width="1.5"/>`;
 
-  // ── 前景人物组 ──
-  const av = (country, gender, stg, x, y) => person(country, gender, stg, x, y, 1);
-  let people = '';
-  // 主角
-  people += av(st.country, st.gender, stage, 148, 148);
-  // 配偶
-  if (st.spouse) people += av(st.country, st.gender === 'male' ? 'female' : 'male', 'adult', 168, 148);
-  // 孩子（最多画 2 个）
-  if (st.children.length && age > 25) {
-    people += av(st.country, Math.random() < 0.5 ? 'male' : 'female', 'kid', 186, 148);
-    if (st.children.length > 1) people += av(st.country, 'female', 'kid', 202, 148);
-  }
-  // 婴儿期画父母在旁
+  // 椭圆云团（两朵，随 phase 变色）
+  const cloudC = phase === 'night' ? '#3A4260' : '#F4F8FA';
+  const clouds = `
+    <g opacity=".92"><ellipse cx="86" cy="30" rx="22" ry="8" fill="${cloudC}"/><ellipse cx="104" cy="26" rx="14" ry="7" fill="${cloudC}"/><ellipse cx="70" cy="27" rx="11" ry="6" fill="${cloudC}"/></g>
+    <g opacity=".85"><ellipse cx="228" cy="38" rx="18" ry="7" fill="${cloudC}"/><ellipse cx="242" cy="34" rx="12" ry="6" fill="${cloudC}"/></g>`;
+
+  // 地面：渐变 + 草簇/石子
+  const gC = urban ? [pal.groundU, '#7A8288'] : [pal.groundR, '#6E9458'];
+  const tuft = (x, c) => `<path d="M${x} ${groundY + 8} Q${x - 2} ${groundY - 2} ${x - 6} ${groundY + 8} M${x} ${groundY + 8} Q${x + 1} ${groundY - 4} ${x + 4} ${groundY + 8}" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  const ground = `
+    <defs><linearGradient id="gg${stage}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${gC[0]}"/><stop offset="1" stop-color="${gC[1]}"/></linearGradient></defs>
+    <rect x="0" y="${groundY}" width="320" height="${210 - groundY}" fill="url(#gg${stage})"/>
+    <path d="M0 ${groundY} L320 ${groundY}" stroke="#5E6A50" stroke-width="2" opacity=".5"/>
+    ${urban ? [52, 148, 232, 292].map(x => `<ellipse cx="${x}" cy="${groundY + 18 + (x % 3) * 7}" rx="7" ry="3.5" fill="#8A9298" opacity=".6"/>`).join('') : [36, 120, 186, 254, 300].map(x => tuft(x, '#5E8A4E')).join('')}`;
+
+  // 家庭人物组（贝塞尔精绘，脚底锚 groundY+22）
+  const fg = groundY + 22;
+  let family = '';
+  family += figureSVG(st.country, st.gender, stage, 232, fg, stage === 'kid' || stage === 'baby' ? 42 : 54, st.group, st.culture);
   if (stage === 'baby') {
-    people = av(st.country, 'male', 'adult', 128, 148) + av(st.country, 'female', 'adult', 172, 148)
-      + `<rect x="148" y="134" width="14" height="12" fill="${pal.clothAlt}"/><rect x="151" y="130" width="7" height="5" fill="${SKIN}"/>`;
+    family = figureSVG(st.country, 'male', 'adult', 118, fg, 50, st.group) + figureSVG(st.country, 'female', 'adult', 268, fg, 47, st.group)
+      + figureSVG(st.country, st.gender, 'baby', 194, fg - 4, 28, st.group);
+  } else {
+    if (st.spouse && age > 20) family += figureSVG(st.country, st.gender === 'male' ? 'female' : 'male', 'adult', 282, fg, 50, st.group, st.culture);
+    if (st.children && st.children.length && age > 25) {
+      family += figureSVG(st.country, 'female', 'kid', 158, fg, 30, st.group, st.culture);
+      if (st.children.length > 1) family += figureSVG(st.country, 'male', 'kid', 306, fg, 28, st.group, st.culture);
+    }
+    if (age >= 60 && st.spouse) family += figureSVG(st.country, st.gender === 'male' ? 'female' : 'male', 'old', 282, fg, 49, st.group, st.culture);
   }
 
-  const ground = urban ? pal.groundU : pal.groundR;
-  const cloud = age >= 80 ? '#8888a8' : '#f0f4f8';
-
-  return `<svg viewBox="0 0 320 210" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid slice">
-    ${R(0, 0, 320, 150, sky)}
-    ${R(40, sunY, 14, 14, sunColor)}
-    ${R(70, 18, 26, 6, cloud)}${R(76, 14, 14, 4, cloud)}
-    ${R(180, 34, 22, 5, cloud)}${R(186, 30, 10, 4, cloud)}
-    ${R(0, 150, 320, 60, ground)}
-    ${R(0, 148, 320, 3, '#6a6a5a')}
-    ${bg}${home}${people}
+  return `<svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice" style="display:block">
+    <defs><linearGradient id="sky${stage}${phase}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${SKY[0]}"/><stop offset="1" stop-color="${SKY[1]}"/></linearGradient></defs>
+    <rect x="0" y="0" width="320" height="${groundY}" fill="url(#sky${stage}${phase})"/>
+    <circle cx="266" cy="${sunY}" r="${sunR + 10}" fill="${sunGlow}" opacity=".25"/>
+    <circle cx="266" cy="${sunY}" r="${sunR}" fill="${sunColor}"/>
+    ${phase === 'night' ? `<circle cx="292" cy="28" r="6" fill="${sunColor}" opacity=".7"/><circle cx="30" cy="24" r="4" fill="${sunColor}" opacity=".5"/><circle cx="54" cy="46" r="3" fill="${sunColor}" opacity=".4"/>` : ''}
+    ${clouds}
+    ${bg}
+    ${home}
+    ${ground}
+    ${family}
   </svg>`;
 }
 
@@ -431,9 +447,9 @@ function person(country, gender, stage, x, groundY, scale) {
 // ── 首页五国群像 ──
 export function crowdSVG() {
   const list = ['china', 'india', 'usa', 'indonesia', 'pakistan'];
-  let s = `<svg viewBox="0 0 190 40" shape-rendering="crispEdges" style="width:190px;height:40px">`;
+  let s = `<svg viewBox="0 0 190 44" style="width:190px;height:44px">`;
   list.forEach((c, i) => {
-    s += `<g transform="translate(${i * 38 + 6}, 0)">${person(c, i % 2 ? 'female' : 'male', 'adult', 0, 38, 1)}</g>`;
+    s += figureSVG(c, i % 2 ? 'female' : 'male', 'adult', i * 38 + 14, 44, 40);
   });
   return s + '</svg>';
 }
