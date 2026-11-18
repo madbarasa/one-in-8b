@@ -65,6 +65,27 @@ function paletteFor(countryId, group) {
   return PALETTES[countryId] || (group && GROUP_PALETTES[group]) || PALETTES.china;
 }
 
+// ─────────────────────────────────────────────────────────────
+// 精绘小人 v0.9.6：对齐原版 1in8b 的贝塞尔插画风
+// 卡片：820×820 圆角浅底（#EBF0ED + 墨描边）——原版 mk-m 同款
+// 人形：820 坐标系 Q 曲线 path（头/身/腿一体），年龄六姿态矩阵
+// 服饰：贝塞尔主体（cloth 色）+ 22 文化圈装饰（ATTIRE 等比桥接）
+// ─────────────────────────────────────────────────────────────
+const INK = '#13212A';      // 原版墨色（轮廓/鞋/眼）
+const CARD_BG = '#EBF0ED';  // 原版卡底
+const WINE = '#8C1D3C';     // 原版酒红点缀
+
+// 姿态参数：头径 / 身高 / 驼背量 / 腿叉 / 头下沉（820 坐标系，脚底锚 0）
+// 婴儿蜷抱 → 幼童短身 → 少年挺拔 → 成年标准 → 中年微驼 → 老年拄拐深驼
+const POSE = {
+  baby:  { headR: 200, headY: 90,  shoulder: 190, waist: 150, hipY: 480, legLen: 160, hunch: 0,   pose: 'curl'  },
+  kid:   { headR: 165, headY: 30,  shoulder: 180, waist: 140, hipY: 420, legLen: 230, hunch: 0,   pose: 'free'  },
+  teen:  { headR: 140, headY: 0,   shoulder: 200, waist: 150, hipY: 430, legLen: 300, hunch: 0,   pose: 'stand' },
+  adult: { headR: 130, headY: -10, shoulder: 215, waist: 155, hipY: 430, legLen: 320, hunch: 0,   pose: 'stand' },
+  mid:   { headR: 128, headY: 20,  shoulder: 225, waist: 170, hipY: 440, legLen: 300, hunch: 40,  pose: 'stand' },
+  old:   { headR: 126, headY: 55,  shoulder: 205, waist: 160, hipY: 435, legLen: 290, hunch: 90,  pose: 'cane'  },
+};
+
 export function avatarSVG(country, gender, stage, size = 16, group = null, culture = null) {
   const pal = paletteFor(country, group);
   const cloth = stage === 'kid' ? pal.clothKid : pal.cloth;
@@ -72,70 +93,104 @@ export function avatarSVG(country, gender, stage, size = 16, group = null, cultu
   const isOld = stage === 'old';
   const isBaby = stage === 'baby';
   const isMid = stage === 'mid';
-  const hair = isOld ? HAIR_OLD : isMid ? pal.hair : HAIR;
-  const R = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}"/>`;
+  const hair = isOld ? HAIR_OLD : isMid ? pal.hair : (pal.hair || HAIR);
+  const skin = pal.skin || SKIN;
+  const isFemale = gender === 'female';
 
+  // 婴儿：襁褓蜷坐——大圆脸 + 包布（Q 曲线）
   if (isBaby) {
-    // 襁褓 8×8：布包裹 + 小脸
-    return `<svg viewBox="0 0 16 16" shape-rendering="crispEdges" width="${size}" height="${size}">
-      ${R(4, 6, 8, 8, alt)}${R(5, 8, 6, 1, pal.accent)}
-      ${R(6, 3, 4, 4, SKIN)}${R(6, 2, 4, 1, HAIR)}
-      ${R(7, 4, 1, 1, '#3a2a1a')}${R(9, 4, 1, 1, '#3a2a1a')}
+    return `<svg viewBox="0 0 820 820" width="${size}" height="${size}">
+      <rect x="14" y="14" width="792" height="792" rx="179" fill="${CARD_BG}" stroke="${INK}" stroke-opacity=".22" stroke-width="8"/>
+      <g transform="translate(410 412) scale(1.05)">
+        <path d="M-260 60 Q-280 -40 -200 -110 Q-120 -170 0 -170 Q120 -170 200 -110 Q280 -40 260 60 Q240 150 120 180 L-120 180 Q-240 150 -260 60 Z" fill="${alt}"/>
+        <path d="M-130 0 Q-145 -60 -90 -100 Q-30 -132 0 -130 Q40 -128 80 -100 Q120 -70 110 -20 Q100 20 50 34 L-40 34 Q-100 26 -130 0 Z" fill="${skin}"/>
+        <ellipse cx="-40" cy="-30" rx="13" ry="15" fill="${INK}"/>
+        <ellipse cx="40" cy="-30" rx="13" ry="15" fill="${INK}"/>
+        <circle cx="-36" cy="-35" r="4.5" fill="#FFF"/>
+        <circle cx="44" cy="-35" r="4.5" fill="#FFF"/>
+        <ellipse cx="-72" cy="-2" rx="17" ry="11" fill="#E0705C" opacity=".8"/>
+        <ellipse cx="72" cy="-2" rx="17" ry="11" fill="#E0705C" opacity=".8"/>
+        <path d="M-16 16 Q0 30 16 16" stroke="${INK}" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M-16 -104 Q-6 -122 6 -118 Q18 -114 22 -100" stroke="${hair}" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <path d="M-215 -75 Q-100 -128 0 -130 Q100 -128 215 -75" stroke="${cloth}" stroke-width="38" fill="none" stroke-linecap="round" opacity=".92"/>
+        <path d="M-60 120 L0 60 L60 120" stroke="${WINE}" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <ellipse cx="-70" cy="6" rx="16" ry="10" fill="#F0A08A" opacity=".55"/>
+        <ellipse cx="70" cy="6" rx="16" ry="10" fill="#F0A08A" opacity=".55"/>
+        <path d="M-230 20 Q-120 90 0 92 Q120 90 230 20" stroke="${INK}" stroke-opacity=".14" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M-110 -92 Q0 -128 110 -92" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
     </svg>`;
   }
 
-  // 站立人形：头 6×6 + 身 8×10 + 腿
-  const h = stage === 'kid' ? 12 : stage === 'teen' ? 20 : 24;
-  const headY = isOld ? 2 : 1;          // 老年微驼：头下沉 1px
-  const bodyY = headY + 7;
-  const bodyH = stage === 'kid' ? 4 : 7;
-  const legY = bodyY + bodyH;
-  const legH = h - legY - 1;
-  const isFemale = gender === 'female';
-  let s = `<svg viewBox="0 0 16 ${h}" shape-rendering="crispEdges" width="${size}" height="${size * h / 16}">`;
+  const p = POSE[stage] || POSE.adult;
+  const legTop = p.hipY;
+  const footY = legTop + p.legLen;
+  const shoulderY = p.headY + p.headR * 2 + 20 + p.hunch * 0.4;
+  const halfSh = p.shoulder / 2;
+  const halfWa = p.waist / 2;
 
-  // 头 + 发（女生长发/男短寸）
-  s += R(5, headY, 6, 6, SKIN);
-  s += R(5, headY, 6, 2, hair);
-  if (isFemale && stage !== 'kid') s += R(4, headY + 2, 1, 5, hair) + R(11, headY + 2, 1, 5, hair);
-  // 眼睛
-  s += R(6, headY + 3, 1, 1, '#2a2a2a') + R(9, headY + 3, 1, 1, '#2a2a2a');
-  // 少年圆脸：脸颊两侧补 1px 肤色
-  if (stage === 'teen') s += R(4, headY + 3, 1, 2, SKIN) + R(11, headY + 3, 1, 2, SKIN);
-  // 中年：发际线后移（额头露出 1px）+ 两鬓灰白起点
-  if (isMid) {
-    s += R(5, headY + 1, 6, 1, SKIN);
-    s += R(5, headY + 2, 1, 1, '#9a9a9a') + R(10, headY + 2, 1, 1, '#9a9a9a');
-  }
-  // 老年：皱纹 2 条 + 眉毛加浓
-  if (isOld) {
-    s += R(6, headY + 2, 4, 1, '#b09078') + R(6, headY + 4, 4, 1, '#b09078');
-    s += R(6, headY + 2, 1, 1, '#6a5a48') + R(9, headY + 2, 1, 1, '#6a5a48');
-  }
+  // 主人形 path：头（arc 圆）+ 颈肩 + 腰臀 + 双腿（一体贝塞尔，footY 为 0 基线倒画）
+  // 头（含 hunch 前倾偏移）
+  const hx = p.hunch ? p.hunch * 0.9 : 0;
+  const head = `<circle cx="${hx}" cy="${p.headY + p.headR}" r="${p.headR}" fill="${skin}"/>`;
 
-  // 身体：女裙 / 男袍裤（国别服饰差异在配色 + 剪裁点缀）
+  // 发型：男短寸 / 女披肩 / 老年灰白全覆盖
+  let hairP;
+  const hr = p.headR;
+  const hcy = p.headY + p.headR;
   if (isFemale && stage !== 'kid') {
-    s += R(4, bodyY, 8, bodyH, cloth);          // 裙身
-    s += R(3, bodyY + bodyH - 1, 10, 1, cloth); // 裙摆
-    s += R(7, bodyY, 2, 1, alt);                // 领饰
-  } else if (country === 'pakistan' || country === 'india') {
-    s += R(4, bodyY, 8, bodyH, cloth);          // 长袍
-    s += R(3, bodyY, 10, 2, cloth);
-    s += R(7, bodyY + 2, 2, 1, alt);
-    s += R(5, legY, 6, 1, cloth);               // 袍脚
+    // 女性长发：顶部发帘 + 两侧垂发条（不越过脸颊）
+    hairP = `<path d="M${hx - hr} ${hcy - 2} Q${hx - hr} ${hcy - hr - 10} ${hx} ${hcy - hr - 10} Q${hx + hr} ${hcy - hr - 10} ${hx + hr} ${hcy - 2} Q${hx + hr * 0.55} ${hcy - hr * 0.42} ${hx} ${hcy - hr * 0.38} Q${hx - hr * 0.55} ${hcy - hr * 0.42} ${hx - hr} ${hcy - 2} Z" fill="${hair}"/>`
+      + `<path d="M${hx - hr - 4} ${hcy - hr * 0.3} Q${hx - hr - 12} ${hcy + hr * 0.55} ${hx - hr + 8} ${hcy + hr * 0.82} L${hx - hr + 34} ${hcy + hr * 0.6} Q${hx - hr + 26} ${hcy} ${hx - hr + 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`
+      + `<path d="M${hx + hr + 4} ${hcy - hr * 0.3} Q${hx + hr + 12} ${hcy + hr * 0.55} ${hx + hr - 8} ${hcy + hr * 0.82} L${hx + hr - 34} ${hcy + hr * 0.6} Q${hx + hr - 26} ${hcy} ${hx + hr - 14} ${hcy - hr * 0.32} Z" fill="${hair}"/>`;
   } else {
-    s += R(4, bodyY, 8, bodyH, cloth);          // 上衣
-    s += R(4, legY, 3, legH, '#3a3f45');        // 裤
-    s += R(9, legY, 3, legH, '#3a3f45');
-    s += R(4, legY + legH, 3, 1, '#2a2a2a') + R(9, legY + legH, 3, 1, '#2a2a2a');
-    s += R(7, bodyY, 2, 1, alt);                // 领饰
+    hairP = `<path d="M${hx - hr} ${hcy - 6} Q${hx - hr} ${hcy - hr - 8} ${hx} ${hcy - hr - 8} Q${hx + hr} ${hcy - hr - 8} ${hx + hr} ${hcy - 6} Q${hx + hr * 0.5} ${hcy - hr * 0.35} ${hx} ${hcy - hr * 0.3} Q${hx - hr * 0.5} ${hcy - hr * 0.35} ${hx - hr} ${hcy - 6} Z" fill="${hair}"/>`;
   }
-  // 老年：拐杖
-  if (isOld) s += R(12, bodyY + 2, 1, 8, '#8a6a4a');
-  // 文化圈服饰装饰（v0.9.2：22 圈传统元素，teen 起生效）
-  s += attireDeco(culture, gender, stage, { R, headY, bodyY, bodyH, legY, pal, cloth, alt });
-  s += '</svg>';
-  return s;
+
+  // 躯干 + 腿（衣服主色；女性裙形下摆展开）
+  const neckY = p.headY + p.headR * 2 + 6;
+  let bodyP;
+  if (isFemale && stage !== 'kid' && stage !== 'teen') {
+    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${p.waist * 0.78} ${legTop + 60} Q0 ${legTop + 120} ${-p.waist * 0.78} ${legTop + 60} Z`;
+  } else {
+    bodyP = `M${-halfSh} ${shoulderY + 30} Q${-halfSh - 10} ${shoulderY} ${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} Q${halfSh + 10} ${shoulderY} ${halfSh} ${shoulderY + 30} L${halfWa} ${legTop} L${-halfWa} ${legTop} Z`;
+  }
+  // 双腿（裤色；old 裙袍遮腿）
+  const legsP = p.pose === 'cane'
+    ? `M${-halfWa} ${legTop} L${halfWa} ${legTop} L${halfWa * 0.5} ${footY} L${-halfWa * 0.5} ${footY} Z`
+    : `M${-halfWa + 8} ${legTop} L${-14} ${legTop} L${-22} ${footY} L${-halfWa - 26} ${footY} Z M${14} ${legTop} L${halfWa - 8} ${legTop} L${halfWa + 26} ${footY} L${22} ${footY} Z`;
+  // 鞋（墨色圆头）
+  const shoes = `<ellipse cx="${-halfWa - 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/><ellipse cx="${halfWa + 6}" cy="${footY + 8}" rx="42" ry="16" fill="${INK}"/>`;
+  // 手臂：两侧垂臂（skin 袖 cloth）
+  const armL = `M${-halfSh - 6} ${shoulderY + 16} Q${-halfSh - 30} ${shoulderY + 150} ${-halfSh - 12} ${legTop - 20} Q${-halfSh + 14} ${legTop - 14} ${-halfSh + 4} ${shoulderY + 60} Z`;
+  const armR = `M${halfSh + 6} ${shoulderY + 16} Q${halfSh + 30} ${shoulderY + 150} ${halfSh + 12} ${legTop - 20} Q${halfSh - 14} ${legTop - 14} ${halfSh - 4} ${shoulderY + 60} Z`;
+  // 拐杖（old）
+  const cane = p.pose === 'cane' ? `<path d="M${halfSh + 70} ${footY} L${halfSh + 70} ${shoulderY - 30} Q${halfSh + 70} ${shoulderY - 78} ${halfSh + 20} ${shoulderY - 72}" stroke="#8a6a4a" stroke-width="16" fill="none" stroke-linecap="round"/>` : '';
+  // 眼睛 + 驼背线
+  const eyes = `<ellipse cx="${hx - p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/><ellipse cx="${hx + p.headR * 0.34}" cy="${hcy + p.headR * 0.1}" rx="10" ry="13" fill="${INK}"/>`;
+  const wrinkle = isOld ? `<path d="M${hx - p.headR * 0.5} ${hcy + p.headR * 0.42} Q${hx} ${hcy + p.headR * 0.52} ${hx + p.headR * 0.5} ${hcy + p.headR * 0.42}" stroke="${INK}" stroke-opacity=".3" stroke-width="7" fill="none" stroke-linecap="round"/>` : '';
+
+  // 人形整体：脚底基线 y=820 卡内缩进
+  // 文化圈装饰桥：旧 16 系 R(x,y,w,h) → 820 系（×51.25，映射到人形区域）
+  const K = 51.25;
+  const oldHeadY = 1 + (isOld ? 1 : 0), oldBodyY = oldHeadY + 7, oldBodyH = stage === 'kid' ? 4 : 7, oldLegY = oldBodyY + oldBodyH;
+  const R = (x, y, w, h, fill) => `<rect x="${(x - 8) * K * 0.62 + hx}" y="${(y - 1) * K * 0.62 + shoulderY * 0.55}" width="${w * K * 0.62}" height="${h * K * 0.62}" fill="${fill}" rx="4"/>`;
+  const deco = attireDeco(culture, gender, stage, { R, headY: oldHeadY, bodyY: oldBodyY, bodyH: oldBodyH, legY: oldLegY, pal, cloth, alt });
+
+  return `<svg viewBox="0 0 820 820" width="${size}" height="${size}">
+    <rect x="14" y="14" width="792" height="792" rx="179" fill="${CARD_BG}" stroke="${INK}" stroke-opacity=".22" stroke-width="8"/>
+    <g transform="translate(410 62) scale(0.9)">
+      ${cane}
+      <path d="${legsP}" fill="${isOld ? cloth : '#3A4148'}"/>
+      ${shoes}
+      <path d="${armL}" fill="${cloth}"/>
+      <path d="${armR}" fill="${cloth}"/>
+      <path d="${bodyP}" fill="${cloth}"/>
+      <path d="M${-halfSh * 0.6} ${neckY + 14} L${halfSh * 0.6} ${neckY + 14} L${halfSh * 0.3} ${neckY - 4} L${-halfSh * 0.3} ${neckY - 4} Z" fill="${alt}" opacity=".85"/>
+      ${head}${hairP}${eyes}${wrinkle}
+      ${deco}
+    </g>
+  </svg>`;
 }
 
 // ── 文化圈服饰装饰 v0.9.2：22 圈传统元素进头像（元素点缀，不做全身戏服）──

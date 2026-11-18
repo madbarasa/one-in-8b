@@ -219,7 +219,10 @@ button { font: inherit; color: inherit; cursor: pointer; border: none; backgroun
   font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
   border-bottom: 1px solid var(--rule2); padding-bottom: 7px; margin-bottom: 10px;
 }
-.id-avatar { display: flex; justify-content: center; margin: 6px 0 4px; image-rendering: pixelated; }
+.id-avatar { display: flex; justify-content: center; margin: 6px 0 4px; }
+.id-avatar svg { filter: drop-shadow(0 1px 2px rgba(19,33,42,.18)); }
+.bc-avatar { display: flex; justify-content: center; margin: 2px 0 8px; }
+.bc-avatar svg { filter: drop-shadow(0 2px 4px rgba(19,33,42,.15)); }
 .id-name { font-family: "Hahmlet", "Noto Serif SC", serif; font-weight: 500; font-size: 22px; text-align: center; }
 .id-rows { margin-top: 8px; }
 .id-rows > div { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px dashed var(--rule); }

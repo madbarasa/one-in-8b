@@ -119,7 +119,7 @@ export function renderBirthCard(b, cardNo, onStart) {
       <div class="bc-head"><span class="t">出生登记</span><span class="no">编号 ${cardNo}</span></div>
       <div class="bc-name">${esc(b.name)}</div>
       ${b.historical ? `<span class="bc-era-tag">${b.birthYear} 年 · 历史世界</span>` : ''}
-      <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 72, b.group)}</div>
+      <div class="bc-avatar" title="${b.countryName}${b.region}的婴儿">${avatarSVG(b.country, b.gender, 'baby', 160, b.group)}</div>
       <p class="bc-desc">${b.birthYear} 年，${b.countryName}${b.region}，${esc(b.father.job)}与${esc(b.mother.job)}的家庭，是个${g}。</p>
       <div class="bc-grid">
         <div><i>性别</i><b>${g}</b></div>
