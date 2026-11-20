@@ -133,8 +133,24 @@ export function renderBirthCard(b, cardNo, onStart) {
         <div><i>信仰</i><b>${b.religion}</b></div>
         <div><i>平均寿命</i><b>${b.lifeExpectancy}岁</b></div>
       </div>
-      <div class="bc-note">家境：五分位中的第 ${b.wealthIdx + 1} 位 · 人均国内生产总值 ${b.gdpPpp.toLocaleString()} 国际元</div>
+      <div class="bc-note"><span class="qdots">${[0,1,2,3,4].map(i => `<i class="${i <= b.wealthIdx ? 'on' : ''}"></i>`).join('')}</span>家境五分位 · 第 ${b.wealthIdx + 1} 位 · 人均国内生产总值 ${b.gdpPpp.toLocaleString()} 国际元</div>
       <button class="btn-continue" id="btn-start">继续</button>
+      <svg class="bc-seal" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <filter id="seal-worn">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n" seed="7"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.92"/></feComponentTransfer>
+          </filter>
+        </defs>
+        <g filter="url(#seal-worn)">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="var(--accent)" stroke-width="3.5"/>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="var(--accent)" stroke-width="1.2"/>
+          <path d="M60 30 L67 50 L88 50 L71 63 L78 84 L60 71 L42 84 L49 63 L32 50 L53 50 Z" fill="var(--accent)"/>
+          <path id="seal-arc" d="M60 60 m-37 0 a37 37 0 1 1 74 0 a37 37 0 1 1 -74 0" fill="none"/>
+          <text font-size="11.5" font-weight="600" fill="var(--accent)" font-family="Hahmlet, Noto Serif SC, serif" letter-spacing="2.5"><textPath href="#seal-arc" startOffset="2%">出生登记专用章 · 八十亿分之一 · 出生登记专用章</textPath></text>
+        </g>
+      </svg>
     </div>
   </div>`;
   document.getElementById('btn-start').onclick = onStart;

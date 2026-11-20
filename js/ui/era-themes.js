@@ -5,19 +5,19 @@
 const ERA_THEMES = [
   {
     min: 1950, max: 1959, name: '胶片年代',
-    vars: { '--bg': '#e6dcc0', '--card': '#f2e9d2', '--ink': '#26211a', '--ink-2': '#5a5142', '--ink-3': '#8f8672', '--accent': '#a3542c', '--line': '#d2c5a4' },
+    vars: { '--bg': '#e6dcc0', '--card': '#f2e9d2', '--ink': '#26211a', '--ink-2': '#5a5142', '--ink-3': '#8f8672', '--line': '#d2c5a4' },
   },
   {
     min: 1960, max: 1979, name: '印刷年代',
-    vars: { '--bg': '#efe4cb', '--card': '#f8efdb', '--ink': '#1e1a14', '--ink-2': '#4e4436', '--ink-3': '#837659', '--accent': '#bf3a26', '--line': '#d8c8a6' },
+    vars: { '--bg': '#efe4cb', '--card': '#f8efdb', '--ink': '#1e1a14', '--ink-2': '#4e4436', '--ink-3': '#837659', '--line': '#d8c8a6' },
   },
   {
     min: 1980, max: 1999, name: '荧光年代',
-    vars: { '--bg': '#e7e9e0', '--card': '#f4f5ee', '--ink': '#15181d', '--ink-2': '#3d444d', '--ink-3': '#6e7883', '--accent': '#0e7490', '--line': '#c9cfc9' },
+    vars: { '--bg': '#eae7da', '--card': '#f6f3e9', '--ink': '#15181d', '--ink-2': '#3d444d', '--ink-3': '#6e7883', '--line': '#c9c7ba' },
   },
   {
     min: 2000, max: 2014, name: '数码年代',
-    vars: { '--bg': '#eceef0', '--card': '#f8f9fa', '--ink': '#1a1d22', '--ink-2': '#43484f', '--ink-3': '#767d86', '--accent': '#4a6fa5', '--line': '#d3d7db' },
+    vars: { '--bg': '#eceef0', '--card': '#f8f9fa', '--ink': '#1a1d22', '--ink-2': '#43484f', '--ink-3': '#767d86', '--line': '#d3d7db' },
   },
 ];
 
