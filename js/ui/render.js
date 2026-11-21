@@ -134,6 +134,7 @@ export function renderBirthCard(b, cardNo, onStart) {
         <div><i>平均寿命</i><b>${b.lifeExpectancy}岁</b></div>
       </div>
       <div class="bc-note"><span class="qdots">${[0,1,2,3,4].map(i => `<i class="${i <= b.wealthIdx ? 'on' : ''}"></i>`).join('')}</span>家境五分位 · 第 ${b.wealthIdx + 1} 位 · 人均国内生产总值 ${b.gdpPpp.toLocaleString()} 国际元</div>
+      <div class="bc-handwrite"><span class="hw-date">登记日期 ${b.birthYear}·${String(1 + (b.name.length % 12)).padStart(2, '0')}·${String(1 + (b.name.charCodeAt(0) % 27)).padStart(2, '0')}</span><span class="hw-sign">登记员 <i>${['王建国', '李秀英', '张桂芳', '陈志明', '刘德海'][b.name.charCodeAt(0) % 5]}</i> 签章</span></div>
       <button class="btn-continue" id="btn-start">继续</button>
       <svg class="bc-seal" viewBox="0 0 120 120" aria-hidden="true">
         <defs>
@@ -149,6 +150,29 @@ export function renderBirthCard(b, cardNo, onStart) {
           <path d="M60 30 L67 50 L88 50 L71 63 L78 84 L60 71 L42 84 L49 63 L32 50 L53 50 Z" fill="var(--accent)"/>
           <path id="seal-arc" d="M60 60 m-37 0 a37 37 0 1 1 74 0 a37 37 0 1 1 -74 0" fill="none"/>
           <text font-size="11.5" font-weight="600" fill="var(--accent)" font-family="Hahmlet, Noto Serif SC, serif" letter-spacing="2.5"><textPath href="#seal-arc" startOffset="2%">出生登记专用章 · 八十亿分之一 · 出生登记专用章</textPath></text>
+        </g>
+      </svg>
+      <svg class="bc-riding-seal" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <filter id="rs-worn"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2"/></filter>
+        </defs>
+        <g filter="url(#rs-worn)">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="var(--stamp)" stroke-width="4"/>
+          <circle cx="60" cy="60" r="43" fill="none" stroke="var(--stamp)" stroke-width="1.4"/>
+          <path d="M60 32 L66.5 51 L87 51 L70.5 63.5 L77 83 L60 71 L43 83 L49.5 63.5 L33 51 L53.5 51 Z" fill="var(--stamp)"/>
+          <path id="rs-arc2" d="M60 60 m-36 0 a36 36 0 1 1 72 0 a36 36 0 1 1 -72 0" fill="none"/>
+          <text font-size="11" font-weight="600" fill="var(--stamp)" font-family="Hahmlet, Noto Serif SC, serif" letter-spacing="2"><textPath href="#rs-arc2" startOffset="8%">档案骑缝章 · 存根联验讫</textPath></text>
+        </g>
+      </svg>
+      <svg class="bc-emboss" viewBox="0 0 150 150" aria-hidden="true">
+        <defs>
+          <filter id="emb"><feDropShadow dx="1.8" dy="1.8" stdDeviation="1.3" flood-color="#FFF" flood-opacity=".95"/><feDropShadow dx="-1.6" dy="-1.6" stdDeviation="1.2" flood-color="#98A29C" flood-opacity="1"/><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#8E988F" flood-opacity=".3"/></filter>
+        </defs>
+        <g filter="url(#emb)" fill="none" stroke="#C2CBC5" stroke-width="1.6">
+          <circle cx="75" cy="75" r="62"/>
+          <circle cx="75" cy="75" r="52" stroke-width="1"/>
+          <path d="M75 38 L82 60 L105 60 L86.5 73.5 L94 96 L75 81.5 L56 96 L63.5 73.5 L45 60 L68 60 Z" stroke-width="1.4"/>
+          <path d="M75 75 m-44 0 a44 44 0 1 1 88 0" stroke-dasharray="2.5 4" stroke-width="1"/>
         </g>
       </svg>
     </div>
